@@ -1,0 +1,65 @@
+### This workflow build and push ONLYOFFICE Monday services ###
+name: Monday build
+
+run-name: >-
+  Build Monday: 
+  VER: [${{ inputs.tag }}]
+  REPO: [${{ inputs.repo }}]
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Specify tag (ex. 1.0.0 or 1.0.0-rc25)'
+        type: string
+        required: true
+      repo:
+        description: Mode
+        required: true
+        default: testing
+        type: choice
+        options:
+        - test
+        - production
+    
+jobs:
+  build:
+    name: "Build monday"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code 
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '21'
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_REGISTRY || 'docker.io' }}
+          username: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_USERNAME || secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_ACCESS_TOKEN || secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build
+        env: 
+          REPO: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_REGISTRY || 'docker.io/onlyoffice' }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          ./mvnw install
+          ./mvnw package -pl onlyoffice-monday-gateway -am
+          ./mvnw package -pl onlyoffice-monday-tenant -am
+          ./mvnw package -pl onlyoffice-monday-user -am
+          ./mvnw -pl onlyoffice-monday-gateway jib:dockerBuild -Ddocker.image.name=${REPO}/monday-gateway:${TAG}
+          ./mvnw -pl onlyoffice-monday-tenant jib:dockerBuild -Ddocker.image.name=${REPO}/monday-tenant:${TAG}
+          ./mvnw -pl onlyoffice-monday-user jib:dockerBuild -Ddocker.image.name=${REPO}/monday-user:${TAG}
+          docker push ${REPO}/monday-gateway:${TAG}
+          docker push ${REPO}/monday-tenant:${TAG}
+          docker push ${REPO}/monday-user:${TAG}
