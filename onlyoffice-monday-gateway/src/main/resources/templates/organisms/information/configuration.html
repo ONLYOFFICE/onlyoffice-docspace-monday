@@ -1,56 +1,73 @@
 <template x-component="configuration-information">
-    <div>
-        <div class="mb-8">
+    <div class="flex flex-col items-stretch max-w-[496px]">
+        <div class="mt-0 mb-8 relative w-[386px] max-w-full">
             <div th:replace="~{atoms/logo/svg/horizontal}"></div>
         </div>
-        <div class="flex items-center">
-            <div class="mr-3">
-                <div th:replace="~{atoms/logo/svg/info}"></div>
+        <div class="w-full">
+            <div class="flex items-center gap-2 flex-wrap">
+                <div class="w-4 flex-shrink-0">
+                    <div th:replace="~{atoms/logo/svg/info}"></div>
+                </div>
+                <p th:text="${page?.data?.information?.csp} ?: 'Check the CSP settings'"
+                   class="flex-1 text-[16px] leading-[1.38] font-semibold"
+                   :class="[
+                        $store?.profile?.dark ? 'text-white' : 'text-dark'
+                   ]"
+                ></p>
             </div>
-            <p th:text="${page?.data?.information?.csp} ?: 'Check the CSP settings'"
-               class="font-sans"
-               :class="[
-                    $store?.darkMode?.on ? 'text-white' : ''
-               ]"
-            ></p>
-        </div>
-        <div class="mt-2 w-full max-w-lg">
-            <span
-                    th:text="${page?.data?.information?.credentials} ?: 'Before connecting the app, please go to the DocSpace Settings - Developer tools - JavaScript SDK and add the following credentials to the allow list:'"
-                    class="font-sans"
-                    :class="[
-                    $store?.darkMode?.on ? 'text-white' : ''
-                 ]"
-            ></span>
-            <br/>
-            <br/>
-            <span>
-                <span
-                        th:text="${page?.data?.information?.monday} ?: 'Monday portal address:'"
-                        class="font-sans"
-                        :class="[
-                        $store?.darkMode?.on ? 'text-white' : ''
-                    ]"
-                ></span>
-                <span
-                        th:text="${page?.data?.information?.mondayAddress} ?: 'monday.onlyoffice.com'"
-                        class="ml-2 font-sans font-bold text-blue-500"
-                ></span>
-            </span>
-            <br/>
-            <span>
-                <span
-                        th:text="${page?.data?.information?.app} ?: 'ONLYOFFICE DocSpace app:'"
-                        class="font-sans"
-                        :class="[
-                        $store?.darkMode?.on ? 'text-white' : ''
-                    ]"
-                ></span>
-                <span
-                        th:text="${page?.data?.information?.appAddress} ?: 'monday.onlyoffice.com'"
-                        class="ml-2 font-sans font-bold text-blue-500"
-                ></span>
-            </span>
+            <div class="mt-2 text-[13px] leading-[20px]">
+                <div>
+                    <span
+                            th:text="${page?.data?.information?.credentialsFirst}"
+                            class="font-normal"
+                            :class="[
+                                $store?.profile?.dark ? 'text-white' : 'text-dark'
+                            ]"
+                    ></span>
+                    <span
+                            th:text="${page?.data?.information?.credentialsPath}"
+                            class="font-bold"
+                            :class="[
+                                $store?.profile?.dark ? 'text-white': 'text-dark'
+                            ]"
+                    >
+                    </span>
+                    <span
+                            th:text="${page?.data?.information?.credentialsSecond}"
+                            class="font-normal"
+                            :class="[
+                                $store?.profile?.dark ? 'text-white' : 'text-dark'
+                            ]"
+                    ></span>
+                </div>
+                <br/><br/>
+                <div>
+                    <span
+                            th:text="${page?.data?.information?.monday} ?: 'Monday portal address:'"
+                            class="font-bold"
+                            :class="[
+                                $store?.profile?.dark ? 'text-white' : 'text-dark'
+                            ]"
+                    ></span>
+                    <span
+                            th:text="${page?.data?.information?.mondayAddress} ?: 'monday.onlyoffice.com'"
+                            class="font-bold text-[#4781D1]"
+                    ></span>
+                </div>
+                <div class="mt-1">
+                    <span
+                            th:text="${page?.data?.information?.app} ?: 'ONLYOFFICE DocSpace app:'"
+                            class="font-bold"
+                            :class="[
+                                $store?.profile?.dark ? 'text-white' : 'text-dark'
+                            ]"
+                    ></span>
+                    <span
+                            th:text="${page?.data?.information?.appAddress} ?: 'monday.onlyoffice.com'"
+                            class="font-bold text-[#4781D1]"
+                    ></span>
+                </div>
+            </div>
         </div>
     </div>
 </template>

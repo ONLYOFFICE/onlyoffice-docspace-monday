@@ -2,6 +2,45 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        html {
+            font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        [x-cloak] { display: none !important; }
+        #content,
+        #small-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #content {
+            display: block;
+        }
+        #small-content {
+            display: none;
+        }
+        .small-content-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 354px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 1rem;
+        }
+        @media (max-width: 444px) {
+            #content {
+                display: none;
+            }
+            #small-content {
+                display: flex;
+                padding: 1.5rem;
+            }
+        }
+    </style>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/monday-sdk-js/dist/main.js"></script>
     <script src="https://storage.onlyoffice.com/docspace/static/scripts/sdk/1.0.1/api.js"></script>
@@ -21,17 +60,59 @@
                 persistedEmail: '[[${page?.data?.login?.email}]]',
                 persistedHash: '[[${page?.data?.login?.hash}]]',
                 loginError: '[[${page?.data?.login?.error}]]',
-                init() {
-                    if (this.persistedUrl && this.persistedEmail && this.persistedHash) {
+                cspError: '[[${page?.data?.login?.cspError}]]',
+                sizeHeaderError: '[[${page?.data?.login?.sizeHeaderError}]]',
+                sizeHeaderText: '[[${page?.data?.login?.sizeHeaderText}]]',
+                fetchTranslated: async () => {
+                    const monday = mondaySdk();
+                    const { appFeature, boardId, user } = (await monday.get("context")).data;
+                    let path = `/views/refresh?boardId=${boardId}`;
+                    if (appFeature.type === "AppFeatureAccountSettingsView")
+                        path = `/views/settings/refresh`;
+                    await htmx.ajax('GET', path, {
+                        target: '#content',
+                        swap: 'innerHTML',
+                        headers: {
+                            'Accept-Language': user.currentLanguage,
+                        }
+                    });
+                },
+                async init() {
+                    await this.fetchTranslated();
+                    if (this.persistedUrl) {
                             window.DocSpace.SDK.initSystem({
                                 src: this.persistedUrl,
                                 frameId: 'root-ds',
+                                checkCSP: true,
                                 events: {
                                     onAppReady: async () => {
                                         try {
-                                            await DocSpace.SDK.frames['root-ds'].login(this.persistedEmail, this.persistedHash);
+                                            if (this.persistedEmail && this.persistedHash) {
+                                                const baseDelay = 100;
+                                                const maxDelay = 1000;
+                                                for (let attempt = 1; attempt <= 3; attempt++) {
+                                                    try {
+                                                        const login = await DocSpace.SDK.frames['root-ds'].login(this.persistedEmail, this.persistedHash);
+                                                        if (login && login.url) {
+                                                            const me = await DocSpace.SDK.frames['root-ds'].getUserInfo();
+                                                            Alpine.store('profile').setDocsAdmin(me && me.isAdmin);
+                                                            return;
+                                                        }
+                                                    } catch (error) {
+                                                        if (attempt < 3) {
+                                                            const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
+                                                            await new Promise(resolve => setTimeout(resolve, delay));
+                                                            continue;
+                                                        }
+                                                    }
+                                                }
+                                                throw new Error("Could not log you in. Please make sure that the credentials are valid");
+                                            } else {
+                                                const me = await DocSpace.SDK.frames['root-ds'].getUserInfo();
+                                                Alpine.store('profile').setDocsAdmin(me && me.isAdmin);
+                                            }
                                         } catch (error) {
-                                             this.monday.execute("notice", {
+                                             mondaySdk().execute("notice", {
                                                 message: this.loginError,
                                                 type: "error",
                                                 timeout: 10000,
@@ -42,7 +123,16 @@
                                         }
                                     },
                                     onAppError: (error) => {
-                                        this.monday.execute("notice", {
+                                        if (/\(CSP\)/.test(error)) {
+                                            mondaySdk().execute("notice", {
+                                                message: this.cspError,
+                                                type: "error",
+                                                timeout: 10000,
+                                            });
+                                            this.rootReady = true;
+                                            return;
+                                        }
+                                        mondaySdk().execute("notice", {
                                             message: this.loginError,
                                             type: "error",
                                             timeout: 10000,
@@ -56,31 +146,118 @@
                     }
                 }
             }));
-            Alpine.store("darkMode", {
-                on: false,
-                toggle() {
-                    this.on = ! this.on
+            Alpine.store("profile", {
+                lang: "en",
+                dark: false,
+                docsAdmin: false,
+                setDocsAdmin(val) {
+                    this.docsAdmin = val;
                 },
                 async init() {
                     mondaySdk().listen("context", (ctx) => {
-                        const { theme } = ctx.data;
-                        this.on = theme !== 'light';
+                        const { theme, user } = ctx.data;
+                        this.dark = theme !== 'light';
+                        if (user.currentLanguage != this.lang)
+                            this.lang = user.currentLanguage;
                     });
+                },
+            });
+            Alpine.store('htmxEventManager', {
+                listeners: [],
+                namedListeners: new Map(),
+                sanitizeUrl(url) {
+                    if (!url) return "";
+                    const trimmedUrl = url.trim();
+                    const match = trimmedUrl.match(/^(https?:\/\/)/i);
+                    const protocol = match ? match[1] : '';
+                    let plainUrl = trimmedUrl.replace(/^(https?:\/\/)/i, '');
+                    plainUrl = plainUrl.replace(/\/+$/, '');
+                    plainUrl = plainUrl.trim();
+                    return protocol + plainUrl;
+                },
+                addListener(event, handler) {
+                    htmx.on(event, handler);
+                    this.listeners.push({ event, handler });
+                },
+                removeListener(event, handler) {
+                    htmx.off(event, handler);
+                    this.listeners = this.listeners.filter(
+                        (listener) => listener.event !== event || listener.handler !== handler
+                    );
+                },
+                addNamedListener(name, event, handler) {
+                    if (this.namedListeners.has(name))
+                        return;
+                    htmx.on(event, handler);
+                    this.namedListeners.set(name, { event, handler });
+                },
+                removeNamedListener(name) {
+                    const listener = this.namedListeners.get(name);
+                    if (listener) {
+                        htmx.off(listener.event, listener.handler);
+                        this.namedListeners.delete(name);
+                    } else {
+                        console.warn(`No listener found with name "${name}".`);
+                    }
+                },
+                removeAllListeners() {
+                    this.listeners.forEach(({ event, handler }) => {
+                        htmx.off(event, handler);
+                    });
+                    this.listeners = [];
+                },
+                removeAllNamedListeners() {
+                    this.namedListeners.forEach(({ event, handler }, name) => {
+                        htmx.off(event, handler);
+                    });
+                    this.namedListeners.clear();
+                },
+                clearAllListeners() {
+                    this.removeAllListeners();
+                    this.removeAllNamedListeners();
                 }
             });
         });
     </script>
 </head>
-<body class="h-screen w-screen" x-data="root">
+<body class="h-screen w-screen overflow-x-hidden" x-data="root">
+    <div th:replace="~{atoms/loader/spinner}"></div>
     <div style="display: none;">
         <div id="root-ds"></div>
     </div>
-    <section x-show="rootReady" class="h-full w-full">
-        <div th:replace="~{__${page.location}__}"></div>
-    </section>
+    <div x-show="!rootReady" class="h-full w-full flex justify-center items-center">
+        <x-basic-spinner classes="w-16 h-16"></x-basic-spinner>
+    </div>
+    <div x-show="rootReady" x-cloak class="relative h-full w-full" :class="[
+        $store?.profile?.dark ? 'bg-dark' : 'bg-base'
+    ]">
+        <section id="content" class="h-full w-full" x-data="webSocketConfiguration" hx-ext="ws">
+        </section>
+        <section id="small-content" class="absolute inset-0 hidden">
+            <div class="flex flex-col items-center justify-center w-full max-w-[354px] mx-auto py-[265px] text-center">
+                <div class="w-[150px] max-w-full">
+                    <div th:insert="~{atoms/logo/svg/small}"></div>
+                </div>
+                <div class="mt-5 w-[285px] max-w-full flex flex-col items-stretch justify-center">
+                    <span x-text="sizeHeaderError"
+                          class="text-base font-bold leading-[22px]"
+                          :class="[
+                            $store?.profile?.dark ? 'text-color-generic-dark-text' : 'text-color-generic-text'
+                          ]"
+                    ></span>
+                    <span x-text="sizeHeaderText"
+                          class="mt-2 text-xs text-subtext font-normal leading-[16px]"
+                          :class="[
+                            $store?.profile?.dark ? 'text-color-generic-dark-text' : 'text-color-generic-text'
+                          ]"
+                    ></span>
+                </div>
+            </div>
+        </section>
+    </div>
 </body>
 <script>
-    document.querySelectorAll('[x-component]').forEach(component => {
+    const initComponents = () => document.querySelectorAll('[x-component]').forEach(component => {
         const componentName = `x-${component.getAttribute('x-component')}`;
         if (!customElements.get(componentName)) {
             class Component extends HTMLElement {
@@ -99,6 +276,17 @@
             }
             customElements.define(componentName, Component);
         }
+    });
+    initComponents();
+    const setAcceptLanguageHeader = (event) => {
+        const lang = Alpine.store('profile').lang || navigator.language || 'en';
+        event.detail.headers['Accept-Language'] = lang;
+    };
+    htmx.on('htmx:load', () => initComponents());
+    htmx.on('htmx:configRequest', setAcceptLanguageHeader);
+    window.addEventListener('beforeunload', () => {
+        htmx.off('htmx:configRequest', setAcceptLanguageHeader);
+        Alpine.store('htmxEventManager').clearAllListeners();
     });
 </script>
 </html>

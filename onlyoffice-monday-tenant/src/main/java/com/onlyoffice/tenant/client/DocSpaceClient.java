@@ -1,3 +1,16 @@
+/**
+ * (c) Copyright Ascensio System SIA 2025
+ *
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.onlyoffice.tenant.client;
 
 import com.onlyoffice.common.docspace.transfer.request.command.AuthenticateUser;
@@ -6,7 +19,6 @@ import com.onlyoffice.common.docspace.transfer.response.GenericResponse;
 import com.onlyoffice.common.docspace.transfer.response.MembersAccess;
 import com.onlyoffice.common.docspace.transfer.response.RoomLink;
 import com.onlyoffice.common.docspace.transfer.response.UserToken;
-import com.onlyoffice.tenant.exception.DocSpaceServiceException;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -18,49 +30,30 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
 
 // TODO: Distributed caching in v2?
-@FeignClient(name = "docSpaceClient")
+@FeignClient(name = "docSpaceClient", fallbackFactory = DocSpaceClientFallbackFactory.class)
 public interface DocSpaceClient {
   @Cacheable(value = "userTokens", key = "#command.userName")
   @RequestLine("POST /api/2.0/authentication")
   @Headers("Content-Type: application/json")
   @Retry(name = "docSpaceClientRetry")
-  @CircuitBreaker(name = "docSpaceClientCircuitBreaker", fallbackMethod = "generateTokenFallback")
+  @CircuitBreaker(name = "docSpaceClientCircuitBreaker")
   GenericResponse<UserToken> generateToken(URI baseUri, AuthenticateUser command);
 
   @Cacheable(value = "roomLinks", key = "#roomId")
   @RequestLine("GET /api/2.0/files/rooms/{roomId}/links?type=1")
   @Headers({"Authorization: {token}", "Content-Type: application/json"})
   @Retry(name = "docSpaceClientRetry")
-  @CircuitBreaker(
-      name = "docSpaceClientCircuitBreaker",
-      fallbackMethod = "generateSharedKeyFallback")
+  @CircuitBreaker(name = "docSpaceClientCircuitBreaker")
   GenericResponse<List<RoomLink>> generateSharedKey(
-      URI baseUri, @Param("roomId") int roomId, @Param("token") String token);
+      URI baseUri, @Param("roomId") long roomId, @Param("token") String token);
 
   @RequestLine("PUT /api/2.0/files/rooms/{roomId}/share")
   @Headers({"Authorization: {token}", "Content-Type: application/json"})
   @Retry(name = "docSpaceClientRetry")
-  @CircuitBreaker(
-      name = "docSpaceClientCircuitBreaker",
-      fallbackMethod = "changeRoomAccessFallback")
+  @CircuitBreaker(name = "docSpaceClientCircuitBreaker")
   GenericResponse<MembersAccess> changeRoomAccess(
       URI baseUri,
-      @Param("roomId") int roomId,
+      @Param("roomId") long roomId,
       @Param("token") String token,
       ChangeRoomAccess command);
-
-  default GenericResponse<UserToken> generateTokenFallback(
-      URI baseUri, AuthenticateUser command, Exception ex) {
-    throw new DocSpaceServiceException("Could not generate authentication token", ex);
-  }
-
-  default GenericResponse<List<RoomLink>> generateSharedKeyFallback(
-      URI baseUri, int roomId, String token, Exception ex) {
-    throw new DocSpaceServiceException("Could not generate shared key for room " + roomId, ex);
-  }
-
-  default GenericResponse<MembersAccess> changeRoomAccessFallback(
-      URI baseUri, int roomId, String token, ChangeRoomAccess command, Exception ex) {
-    throw new DocSpaceServiceException("Could not change room access for room " + roomId, ex);
-  }
 }

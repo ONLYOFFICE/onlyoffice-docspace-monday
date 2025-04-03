@@ -29,11 +29,17 @@ spring:
         enabled: false
     feign:
       client:
-        onlyoffice-user-name: ONLYOFFICE-USER
-        onlyoffice-tenant-name: ONLYOFFICE-TENANT
+        onlyoffice-user-name: ${SPRING_CLOUD_FEIGN_ONLYOFFICE_USER_NAME:ONLYOFFICE-USER}
+        onlyoffice-tenant-name: ${SPRING_CLOUD_FEIGN_ONLYOFFICE_TENANT_NAME:ONLYOFFICE-TENANT}
     openfeign:
       circuitbreaker:
         enabled: true
+      client:
+        config:
+          default:
+            connectTimeout: 2250
+            readTimeout: 3000
+            loggerLevel: basic
   application:
     name: onlyoffice-gateway
   config:
@@ -44,6 +50,26 @@ eureka:
   client:
     enabled: true
 resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+      command:
+        timeoutDuration: 3s
+        cancelRunningFuture: true
+      query:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
+    instances:
+      tenantServiceCommandTimeLimiter:
+        baseConfig: command
+      tenantServiceQueryTimeLimiter:
+        baseConfig: query
+      userServiceCommandTimeLimiter:
+        baseConfig: command
+      userServiceQueryTimeLimiter:
+        baseConfig: query
   circuitbreaker:
     configs:
       default:
@@ -94,6 +120,16 @@ resilience4j:
         baseConfig: command
       userServiceQueryRetry:
         baseConfig: query
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+    instances:
+      tenantServiceBulkhead:
+        baseConfig: default
+      userServiceBulkhead:
+        baseConfig: default
 info:
   app:
     name: "onlyoffice-gateway"

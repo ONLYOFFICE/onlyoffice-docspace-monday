@@ -1,4 +1,4 @@
-<div x-data="webSocketConfiguration" hx-ext="ws">
+<div>
     <div>
         <div th:replace="~{atoms/loader/spinner}"></div>
         <div th:replace="~{atoms/text/bold}"></div>
@@ -10,27 +10,13 @@
         function createRoomData() {
             return {
                 url: '[[${page?.data?.login?.url}]]',
+                roomsQuotaError: '[[${page?.data?.roomsQuotaError}]]',
                 timeoutError: '[[${page?.data?.timeoutError}]]',
                 operationError: '[[${page?.data?.operationError}]]',
-                monday: null,
+                cspError: '[[${page?.data?.login?.cspError}]]',
                 loading: false,
                 disabled: false,
                 onAppReadyProcessed: false,
-                async init() {
-                    this.monday = mondaySdk();
-                    const { boardId } = (await this.monday.get("context")).data;
-                    htmx.on('htmx:wsBeforeMessage', (evt) => {
-                        try {
-                            const msg = JSON.parse(evt.detail.message);
-                            if (msg && msg.type == "room_created" && msg["board_id"] == this.boardId) {
-                                location.reload();
-                                return;
-                            }
-                        } catch(err) {
-                            console.log(err);
-                        }
-                    });
-                },
                 disable() {
                     this.disabled = true;
                     this.loading = true;
@@ -41,6 +27,7 @@
                 },
                 createRoom() {
                     this.disable();
+                    const monday = mondaySdk();
                     const frame = window.DocSpace.SDK.initManager({
                         src: this.url,
                         frameId: 'ds-frame',
@@ -48,14 +35,16 @@
                             onAppReady: async () => {
                                 if (this.onAppReadyProcessed) return;
                                 this.onAppReadyProcessed = true;
-                                const context = await this.monday.get("context");
+                                const context = await monday.get("context");
                                 const docSpace = DocSpace.SDK.frames['ds-frame'];
-                                const boardResponse = await this.monday.api(`
+                                const boardResponse = await monday.api(`
                                     query {
                                         boards(ids: ${context.data.boardId}) {
                                             name
                                             subscribers {
                                               id
+                                              is_guest
+                                              is_view_only
                                             }
                                         }
                                     }
@@ -67,7 +56,8 @@
                                     return;
                                 }
 
-                                const ids = board.subscribers.map(subscriber => subscriber.id);
+                                const ids = board.subscribers.filter(subscriber => !subscriber.is_guest && !subscriber.is_view_only)
+                                    .map(subscriber => subscriber.id);
 
                                 const withTimeout = (promise, timeout) => {
                                     return Promise.race([
@@ -79,17 +69,37 @@
                                 };
 
                                 try {
+                                    const mondayTag = "Monday integration";
+                                    const composeTag = String(`Monday Board - ${context.data.boardId}`);
                                     const results = await withTimeout(Promise.allSettled([
-                                        docSpace.createTag("Monday"),
-                                        docSpace.createTag(`Monday-${context.data.boardId}`),
+                                        docSpace.createTag(mondayTag),
+                                        docSpace.createTag(composeTag),
                                         docSpace.createRoom(board.name, 6),
                                     ]), 10000);
 
                                     const roomResult = results[2];
-                                    const composeTag = String(`Monday-${context.data.boardId}`);
-                                    if (!roomResult?.value?.id)
-                                        throw new Error("Could not create a new room");
-                                    const link = await docSpace.addTagsToRoom(roomResult.value.id, ["Monday", composeTag]);
+                                    if (!roomResult?.value?.id) {
+                                        if (roomResult?.value?.status == 402) {
+                                            this.enable();
+                                            this.onAppReadyProcessed = false;
+                                            await monday.execute("notice", {
+                                                message: this.roomsQuotaError,
+                                                type: "error",
+                                                timeout: 10000,
+                                            });
+                                        } else {
+                                            this.enable();
+                                            this.onAppReadyProcessed = false;
+                                            await monday.execute("notice", {
+                                                message: this.operationError,
+                                                type: "error",
+                                                timeout: 10000,
+                                            });
+                                        }
+                                        return;
+                                    }
+
+                                    const link = await docSpace.addTagsToRoom(roomResult.value.id, [mondayTag, composeTag]);
                                     if (!link?.id)
                                         throw new Error("Could not create a new room");
 
@@ -101,66 +111,112 @@
                                             roomId: roomResult?.value?.id,
                                             users: ids,
                                         },
-                                    }).then(response => {
-                                        location.reload();
                                     }).catch(async (error) => {
-                                        await mondaySdk().execute("notice", {
+                                        this.enable();
+                                        this.onAppReadyProcessed = false;
+                                        await monday.execute("notice", {
                                             message: this.operationError,
                                             type: "error",
                                             timeout: 10000,
                                         });
-                                        console.log(error);
-                                        this.enable();
-                                        this.onAppReadyProcessed = false;
                                     });
                                 } catch (error) {
-                                    await mondaySdk().execute("notice", {
+                                    this.enable();
+                                    this.onAppReadyProcessed = false;
+                                    await monday.execute("notice", {
                                         message: this.timeoutError,
                                         type: "error",
                                         timeout: 10000,
                                     });
-                                    console.log(error);
+                                } finally {
+                                    await DocSpace.SDK.frames['ds-frame'].destroyFrame();
+                                }
+                            },
+                            onAppError: (error) => {
+                                if (/\(CSP\)/.test(error)) {
+                                    mondaySdk().execute("notice", {
+                                        message: this.cspError,
+                                        type: "error",
+                                        timeout: 10000,
+                                    });
                                     this.enable();
                                     this.onAppReadyProcessed = false;
                                     return;
                                 }
+                                mondaySdk().execute("notice", {
+                                        message: this.operationError,
+                                        type: "error",
+                                        timeout: 10000,
+                                });
+                                this.enable();
+                                this.onAppReadyProcessed = false;
                             },
                         }
                     });
-                }
+                },
+                socketHandler: async (evt) => {
+                    try {
+                        const { boardId } = (await mondaySdk().get("context")).data;
+                        const msg = JSON.parse(evt.detail.message);
+                        if (msg && msg.type == "room_created" && msg["board_id"] == boardId)
+                            htmx.ajax('GET', `/views/refresh?boardId=${boardId}`, { target: '#content', swap: 'innerHTML' });
+                    } catch (err) {
+                        console.log(err);
+                    }
+                },
+                async init() {
+                    Alpine.store('htmxEventManager').addListener("htmx:wsBeforeMessage", this.socketHandler);
+                    Alpine.store('htmxEventManager').addListener('htmx:beforeSwap', (evt) => {
+                        Alpine.store('htmxEventManager').removeAllListeners();
+                    });
+                },
             }
         }
     </script>
     <main x-data="createRoomData"
           class="min-h-screen w-full flex flex-col justify-center items-center p-4 text-center"
     >
-        <div style="display: none;">
-            <div id="ds-frame"></div>
+        <div x-show="$store?.profile?.docsAdmin" class="flex flex-col justify-center items-center">
+            <div style="display: none;">
+                <div id="ds-frame"></div>
+            </div>
+            <div th:insert="~{atoms/logo/svg/room}" class="mb-5"></div>
+            <div class="mb-2 text-base">
+                <x-bold-text
+                        classes="font-sans"
+                        th:data-text="${page?.data?.creationInformation?.welcomeText}"
+                        :class="[
+                            $store?.profile?.dark ? 'text-white' : 'text-dark'
+                        ]"
+                ></x-bold-text>
+            </div>
+            <div class="mb-4 text-xs text-subtext">
+                <x-generic-text
+                        classes="font-sans"
+                        th:data-text="${page?.data?.creationInformation?.createText}"
+                ></x-generic-text>
+            </div>
+            <div class="w-[135px] h-[32px] mx-auto">
+                <x-loader-button
+                        th:data-text="${page?.data?.creationInformation?.buttonText}"
+                        @click="createRoom"
+                        classes="font-bold py-2 px-7 w-full h-full rounded-[3px] text-xs"
+                        :disabled="disabled"
+                        :loading="loading"
+                ></x-loader-button>
+            </div>
         </div>
-        <div th:insert="~{atoms/logo/svg/room}" class="mb-6 md:mb-8 lg:mb-10"></div>
-        <div class="mb-4 text-lg md:text-xl lg:text-2xl">
-            <x-bold-text
-                    classes="font-sans"
-                    th:data-text="${page?.data?.creationInformation?.welcomeText} ?: 'Welcome to DocSpace Board!'"
-                    :class="[
-                        $store?.darkMode?.on ? 'text-white' : ''
-                    ]"
-            ></x-bold-text>
-        </div>
-        <div class="mb-4 text-sm md:text-base lg:text-lg">
-            <x-generic-text
-                    classes="font-sans"
-                    th:data-text="${page?.data?.creationInformation?.createText} ?: 'Please create the room'"
-            ></x-generic-text>
-        </div>
-        <div class="w-[135px] mx-auto">
-            <x-loader-button
-                    th:data-text="${page?.data?.creationInformation?.buttonText} ?: 'Create room'"
-                    @click="createRoom"
-                    classes="p-2 w-full font-sans"
-                    :disabled="disabled"
-                    :loading="loading"
-            ></x-loader-button>
+        <div x-show="!$store?.profile?.docsAdmin" class="flex flex-col justify-center items-center">
+            <div th:replace="~{atoms/logo/svg/stop}"></div>
+            <div class="w-[285px] mt-5 text-center">
+                <x-bold-text
+                        th:data-text="${page?.data?.creationInformation?.noPermissionsText}"
+                        classes="font-sans"
+                        :class="[
+                           $store?.profile?.dark ? 'text-white' : 'text-dark'
+                        ]"
+                ></x-bold-text>
+            </div>
         </div>
     </main>
 </div>

@@ -1,3 +1,16 @@
+/**
+ * (c) Copyright Ascensio System SIA 2025
+ *
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.onlyoffice.tenant.service.remote;
 
 import com.onlyoffice.common.CommandMessage;
@@ -19,11 +32,13 @@ import feign.Target;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -37,6 +52,7 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
   private final PlatformTransactionManager transactionManager;
   private final TenantRepository tenantRepository;
   private final BoardRepository boardRepository;
+  private final CacheManager cacheManager;
 
   private final DocSpaceClient client;
 
@@ -44,11 +60,13 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
       EncryptionService encryptionService,
       TenantRepository tenantRepository,
       BoardRepository boardRepository,
-      PlatformTransactionManager transactionManager) {
+      PlatformTransactionManager transactionManager,
+      CacheManager cacheManager) {
     this.encryptionService = encryptionService;
     this.tenantRepository = tenantRepository;
     this.boardRepository = boardRepository;
     this.transactionManager = transactionManager;
+    this.cacheManager = cacheManager;
     this.client =
         Feign.builder()
             .encoder(new JacksonEncoder())
@@ -59,6 +77,8 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
   public AccessKeyRefreshed refreshAccessKey(CommandMessage<RefreshAccessKey> command) {
     try {
       var payload = command.getPayload();
+      var boardsCache = cacheManager.getCache("boards");
+      if (boardsCache != null) boardsCache.evict(payload.getBoardId());
 
       MDC.put("board_id", String.valueOf(payload.getBoardId()));
       log.info("Refreshing access key for current board");
@@ -72,7 +92,7 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
                           String.format("Could not find board with id %d", payload.getBoardId())));
       var docspace = board.getTenant().getDocspace();
       var url = URI.create(docspace.getUrl());
-      var accessKey =
+      var accessKeyResult =
           CompletableFuture.supplyAsync(
                   () ->
                       client.generateToken(
@@ -83,17 +103,26 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
                               .build()))
               .thenApply(
                   token ->
-                      client
-                          .generateSharedKey(url, board.getRoomId(), token.getResponse().getToken())
-                          .getResponse()
-                          .getFirst()
-                          .getSharedTo()
-                          .getRequestToken())
-              .get(2, TimeUnit.SECONDS);
+                      Optional.ofNullable(
+                          client
+                              .generateSharedKey(
+                                  url, board.getRoomId(), token.getResponse().getToken())
+                              .getResponse()))
+              .exceptionally((ex) -> Optional.empty())
+              .get(5, TimeUnit.SECONDS);
 
+      var accessKey =
+          accessKeyResult
+              .orElseThrow(
+                  () ->
+                      new OperationExecutionException(
+                          "Could not get an accessKey response from DocSpace"))
+              .getFirst()
+              .getSharedTo()
+              .getRequestToken();
       var template = new TransactionTemplate(transactionManager);
       template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-      template.setTimeout(1);
+      template.setTimeout(2);
       template.execute(
           status -> {
             boardRepository.getReferenceById(payload.getBoardId()).setAccessKey(accessKey);
@@ -104,7 +133,7 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
           .boardId(payload.getBoardId())
           .build();
     } catch (Exception e) {
-      log.error("Could not refresh access key", e);
+      log.warn("Could not refresh access key", e);
       throw new OperationExecutionException(e);
     } finally {
       MDC.clear();
@@ -154,9 +183,9 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
                                   .collect(Collectors.toSet()))
                           .notify(true)
                           .build()))
-          .get(3, TimeUnit.SECONDS);
+          .get(5, TimeUnit.SECONDS);
     } catch (Exception e) {
-      log.error("Could not invite users to DocSpace", e);
+      log.warn("Could not invite users to DocSpace", e);
       throw new OperationExecutionException(e);
     } finally {
       MDC.clear();

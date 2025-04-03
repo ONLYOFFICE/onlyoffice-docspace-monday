@@ -33,4 +33,5 @@ build/
 .vscode/
 
 dist
+node
 node_modules

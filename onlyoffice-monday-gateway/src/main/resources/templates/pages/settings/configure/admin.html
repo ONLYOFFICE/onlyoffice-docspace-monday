@@ -13,30 +13,6 @@
         <div th:replace="~{organisms/form/settings}"></div>
         <div th:replace="~{organisms/information/configuration}"></div>
     </div>
-    <main x-data="configureAdminData" class="flex flex-col justify-center items-center min-h-screen overflow-hidden p-4 sm:p-8" role="main">
-        <div style="display: none;">
-            <div id="ds-frame"></div>
-        </div>
-        <div class="h-full w-full flex justify-center items-center py-8">
-            <div class="w-full max-w-[960px] flex flex-col md:flex-row items-start space-y-8 md:space-y-0 md:space-x-8">
-                <div class="w-full max-w-[500px]">
-                    <x-configuration-information class="w-full"></x-configuration-information>
-                </div>
-                <form class="bg-white p-8 rounded-lg shadow-lg"
-                      :class="[
-                          $store?.darkMode?.on ? 'bg-background-dark' : 'bg-white'
-                      ]"
-                      style="width: 384px; transition: border-color 0.3s ease;"
-                      @submit="toggleSubmit"
-                      :hx-post="path"
-                      hx-swap="none"
-                      hx-trigger="submit"
-                >
-                    <x-docspace-settings-form></x-docspace-settings-form>
-                </form>
-            </div>
-        </div>
-    </main>
     <script>
         function configureAdminData() {
             return {
@@ -47,10 +23,13 @@
                 disabled: false,
                 loading: false,
                 url: "",
+                lastUrl: "",
                 email: "",
                 password: "",
+                error: false,
                 loginError: "[[${page?.data?.login?.error}]]",
                 loginSuccess: "[[${page?.data?.login?.success}]]",
+                cspError: "[[${page?.data?.login?.cspError}]]",
                 setError() {
                     this.error = true;
                     this.loading = false;
@@ -59,78 +38,144 @@
                 toggleSubmit() {
                     this.disabled = true;
                     this.loading = true;
+                    this.url = Alpine.store('htmxEventManager').sanitizeUrl(this.url);
+                    this.email = this.email.trim();
                 },
-                init() {
-                    this.monday = mondaySdk();
-                    htmx.on('htmx:beforeRequest', async (evt) => {
+                resetLoading() {
+                    this.loading = false;
+                    this.disabled = false;
+                },
+                socketHandler: async (evt) => {
+                    try {
+                        const monday = mondaySdk();
+                        const data = (await monday.get("context")).data;
+                        const msg = JSON.parse(evt.detail.message);
+                        if (msg && msg['tenant_id'] == data?.account?.id)
+                            htmx.ajax('GET', `/views/settings/refresh?boardId=${data?.boardId}`, { target: '#content', swap: 'innerHTML' });
+                    } catch (err) {
+                        console.log(err);
+                    }
+                },
+                async processLogin(evt, url, email, password) {
+                    try {
+                        const monday = mondaySdk();
+                        const { boardId } = (await monday.get("context")).data;
+                        const settings = await DocSpace.SDK.frames['ds-frame'].getHashSettings();
+                        const hash = await DocSpace.SDK.frames['ds-frame'].createHash(password, settings);
+                        const login = await DocSpace.SDK.frames['ds-frame'].login(email, hash);
+                        const me = await DocSpace.SDK.frames['ds-frame'].getUserInfo();
+                        Alpine.store('profile').setDocsAdmin(me && me.isAdmin);
+
+                        if (login && login.url) {
+                            const response = await fetch(this.path, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    "docspace_user_id": me.id,
+                                    "docspace_url": url,
+                                    "docspace_email": email,
+                                    "docspace_hash": hash,
+                                }),
+                                headers: {
+                                    ...evt.detail.requestConfig.headers,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            if (!response.ok) {
+                                this.setError();
+                                await monday.execute("notice", {
+                                    message: this.loginError,
+                                    type: "error",
+                                    timeout: 10000,
+                                });
+                            } else {
+                                await monday.execute("notice", {
+                                    message: this.loginSuccess,
+                                    type: "success",
+                                    timeout: 10000,
+                                });
+                                htmx.ajax('GET', `/views/settings/refresh?boardId=${boardId}`, { target: '#content', swap: 'innerHTML' });
+                            }
+                        } else {
+                            this.setError();
+                        }
+                    } catch (error) {
+                        this.setError();
+                    }
+                },
+                async init() {
+                    Alpine.store('htmxEventManager').addListener("htmx:wsBeforeMessage", this.socketHandler);
+                    Alpine.store('htmxEventManager').addListener('htmx:beforeRequest', async (evt) => {
                         if (evt.detail.pathInfo.finalRequestPath !== this.path) {
                             return;
                         }
 
                         evt.preventDefault();
                         try {
-                            const timeout = setTimeout(() => this.setError(), 6500);
-                            const frame = window.DocSpace.SDK.initSystem({
-                                src: this.url,
-                                frameId: 'ds-frame',
-                                events: {
-                                    onAppReady: async () => {
-                                        try {
-                                            clearTimeout(timeout);
-                                            const settings = await DocSpace.SDK.frames['ds-frame'].getHashSettings();
-                                            const hash = await DocSpace.SDK.frames['ds-frame'].createHash(this.password, settings);
-                                            const login = await DocSpace.SDK.frames['ds-frame'].login(this.email, hash);
-                                            const me = await DocSpace.SDK.frames['ds-frame'].getUserInfo();
-                                            if (login && login.url) {
-                                                fetch(this.path, {
-                                                    method: 'POST',
-                                                    body: JSON.stringify({
-                                                        "docspace_user_id": me.id,
-                                                        "docspace_url": this.url,
-                                                        "docspace_email": this.email,
-                                                        "docspace_hash": hash,
-                                                    }),
-                                                    headers: {
-                                                        ...evt.detail.requestConfig.headers,
-                                                        'Content-Type': 'application/json',
-                                                    },
-                                                }).then(response => {
-                                                    if (!response.ok) {
-                                                        this.monday.execute("notice", {
-                                                           message: this.loginError,
-                                                           type: "error",
-                                                           timeout: 10000,
-                                                        });
-                                                        throw new Error('Could not persist user credentials');
-                                                    } else {
-                                                        this.monday.execute("notice", {
-                                                           message: this.loginSuccess,
-                                                           type: "success",
-                                                           timeout: 10000,
-                                                        });
-                                                        location.reload();
-                                                    }
-                                                }).catch(error => {
-                                                    this.setError();
-                                                });
-                                            } else {
+                            if (this.url && this.url != this.lastUrl) {
+                                const timeout = setTimeout(() => this.setError(), 12500);
+                                window.DocSpace.SDK.initSystem({
+                                    src: this.url,
+                                    frameId: 'ds-frame',
+                                    checkCSP: true,
+                                    events: {
+                                        onAppReady: async () => {
+                                            try {
+                                                clearTimeout(timeout);
+                                                if (this.error) return;
+                                                this.lastUrl = this.url;
+                                                await this.processLogin(evt, this.url, this.email, this.password);
+                                            } catch (error) {
                                                 this.setError();
                                             }
-                                        } catch (error) {
+                                        },
+                                        onAppError: async (error) => {
+                                            if (/\(CSP\)/.test(error)) {
+                                                this.resetLoading();
+                                                await mondaySdk().execute("notice", {
+                                                    message: this.cspError,
+                                                    type: "error",
+                                                    timeout: 10000,
+                                                });
+                                                return;
+                                            }
                                             this.setError();
-                                        } finally {
-                                            await DocSpace.SDK.frames['ds-frame'].destroyFrame();
-                                        }
+                                        },
                                     },
-                                    onAppError: (error) => this.setError()
-                                }
-                            });
-                        } catch {
+                                });
+                            } else {
+                                await this.processLogin(evt, this.url, this.email, this.password);
+                            }
+                        } catch (error) {
                             this.setError();
                         }
                     });
+                    Alpine.store('htmxEventManager').addListener('htmx:afterSwap', (evt) => {
+                        Alpine.store('htmxEventManager').removeAllListeners();
+                    });
                 },
-            }
+            };
         }
     </script>
+    <main x-data="configureAdminData" class="flex flex-col justify-center items-center min-h-screen overflow-hidden p-4 sm:p-8" role="main">
+        <div style="display: none;">
+            <div id="ds-frame"></div>
+        </div>
+        <div class="flex flex-col md:flex-row justify-center items-center md:items-start space-y-4 md:space-y-0 md:space-x-4 w-full max-w-7xl">
+            <div class="w-[386px] md:w-full md:max-w-lg flex justify-center">
+                <x-configuration-information class="w-full" style="display: flex; justify-content: center;"></x-configuration-information>
+            </div>
+            <form class="p-6 md:p-8 rounded-lg shadow-lg w-[384px] flex-shrink-0"
+                  :class="[
+                      $store?.profile?.dark ? 'bg-dark' : 'bg-base'
+                  ]"
+                  @submit="toggleSubmit"
+                  :hx-post="path"
+                  hx-swap="none"
+                  hx-trigger="submit"
+            >
+                <x-docspace-settings-form></x-docspace-settings-form>
+            </form>
+        </div>
+    </main>
 </div>

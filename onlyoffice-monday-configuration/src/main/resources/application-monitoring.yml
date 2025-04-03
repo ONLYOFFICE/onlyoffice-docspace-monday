@@ -7,6 +7,9 @@ management:
     enabled: ${MANAGEMENT_TRACING_ENABLED:false}
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:0.5}
+  metrics:
+    tags:
+      application: ${spring.application.name}
   endpoint:
     health:
       readiness-state:
@@ -19,8 +22,10 @@ management:
     enabled: ${MANAGEMENT_OTLP_ENABLED:false}
     metrics:
       export:
+        enabled: ${MANAGEMENT_OTLP_ENABLED:false}
         url: ${MANAGEMENT_OTLP_METRICS_EXPORT_URL:http://localhost:4318/v1/metrics}
     tracing:
+      enabled: ${MANAGEMENT_TRACING_ENABLED:false}
       endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
   info:
     env:

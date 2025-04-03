@@ -1,14 +1,15 @@
 <configuration>
-    <springProfile name="default">
+    <springProfile name="default,d,dev,develop,development">
         <include resource="org/springframework/boot/logging/logback/base.xml"/>
     </springProfile>
-    <springProfile name="kubernetes">
+    <springProfile name="kubernetes,performance">
+        <logger name="org.hibernate" level="OFF" />
         <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeMdc>true</includeMdc>
             </encoder>
         </appender>
-        <root level="INFO">
+        <root level="WARN">
             <appender-ref ref="jsonConsoleAppender"/>
         </root>
     </springProfile>

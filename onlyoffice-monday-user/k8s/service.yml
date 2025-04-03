@@ -7,8 +7,12 @@ metadata:
     spring-boot: "true"
 spec:
   ports:
-    - port: 8080
+    - name: service-port
+      port: 8080
       protocol: TCP
+    - name: hazelcast-port
+      port: 5701
+      targetPort: 5701
   selector:
     app: onlyoffice-user
   type: ClusterIP

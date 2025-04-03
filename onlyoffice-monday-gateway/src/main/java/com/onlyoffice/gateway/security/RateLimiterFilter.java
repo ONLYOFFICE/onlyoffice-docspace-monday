@@ -1,6 +1,19 @@
+/**
+ * (c) Copyright Ascensio System SIA 2025
+ *
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.onlyoffice.gateway.security;
 
-import io.github.bucket4j.BucketConfiguration;
+import com.onlyoffice.gateway.configuration.security.DistributedRateLimiterFactoryConfiguration;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,8 +21,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -24,7 +35,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class RateLimiterFilter extends OncePerRequestFilter {
   private final String X_FORWARDED_FOR = "X-Forwarded-For";
 
-  private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
+  private final DistributedRateLimiterFactoryConfiguration bucketFactory;
   private final LettuceBasedProxyManager proxyManager;
 
   protected void doFilterInternal(
@@ -32,7 +43,8 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     try {
       var method = request.getMethod();
-      var bucketConfigurationFactory = bucketFactory.apply(HttpMethod.valueOf(method));
+      var bucketConfigurationFactory =
+          bucketFactory.bucketConfigurationFactory().apply(HttpMethod.valueOf(method));
       var client = request.getHeader(X_FORWARDED_FOR);
       if (client == null || client.isBlank()) client = request.getRemoteAddr();
       var bucket =

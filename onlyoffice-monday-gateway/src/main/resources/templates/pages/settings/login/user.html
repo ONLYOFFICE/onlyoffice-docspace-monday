@@ -13,6 +13,137 @@
         <div th:replace="~{organisms/form/common}"></div>
         <div th:replace="~{organisms/form/login}"></div>
     </div>
+    <script>
+        function loginUserData() {
+            return {
+                admin: false,
+                login: true,
+                path: "/api/1.0/settings/login",
+                disabled: false,
+                loading: false,
+                error: false,
+                url: "[[${page?.data?.login?.url}]]",
+                email: "",
+                password: "",
+                loginError: "[[${page?.data?.login?.error ?: 'Login failed'}]]",
+                loginSuccess: "[[${page?.data?.login?.success ?: 'Login successful'}]]",
+                cspError: "[[${page?.data?.login?.cspError}]]",
+                setError() {
+                    this.error = true;
+                    this.loading = false;
+                    this.disabled = false;
+                },
+                setCspError() {
+                    this.loading = false;
+                    this.disabled = true;
+                },
+                setSuccess() {
+                    this.error = false;
+                    this.loading = false;
+                    this.disabled = false;
+                },
+                setDocSpaceReady() {
+                    this.disabled = false;
+                },
+                toggleSubmit() {
+                    this.disabled = true;
+                    this.loading = true;
+                    this.url = Alpine.store('htmxEventManager').sanitizeUrl(this.url);
+                    this.email = this.email.trim();
+                },
+                resetLoading() {
+                    this.loading = false;
+                    this.disabled = false;
+                },
+                init() {
+                    const timeout = setTimeout(async () => {
+                        this.setError();
+                        await mondaySdk().execute("notice", {
+                            message: this.docsError,
+                            type: "error",
+                            timeout: 10000,
+                        });
+                    }, 6500);
+
+                    const docSpace = window.DocSpace.SDK.initSystem({
+                        src: this.url,
+                        frameId: 'ds-frame',
+                        checkCSP: true,
+                        events: {
+                            onAppReady: async () => {
+                                clearTimeout(timeout);
+                                if (this.error) return;
+                                this.setDocSpaceReady();
+                            },
+                            onAppError: (error) => {
+                                clearTimeout(timeout);
+                                if (/\(CSP\)/.test(error)) {
+                                    this.setCspError();
+                                    mondaySdk().execute("notice", {
+                                        message: this.cspError,
+                                        type: "error",
+                                        timeout: 10000,
+                                    });
+                                    return;
+                                }
+                            },
+                        }
+                    });
+
+                    Alpine.store('htmxEventManager').addListener("htmx:beforeRequest", async (evt) => {
+                        if (evt.detail.pathInfo.finalRequestPath !== this.path) return;
+
+                        evt.preventDefault();
+                        try {
+                            const monday = mondaySdk();
+                            const settings = await docSpace.getHashSettings();
+                            const hash = await docSpace.createHash(this.password, settings);
+                            const login = await docSpace.login(this.email, hash);
+                            const me = await docSpace.getUserInfo();
+
+                            if (login && login.url) {
+                                const response = await fetch(this.path, {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                        "docspace_user_id": me.id,
+                                        "docspace_email": this.email,
+                                        "docspace_hash": hash,
+                                    }),
+                                    headers: {
+                                        ...evt.detail.requestConfig.headers,
+                                        'Content-Type': 'application/json',
+                                    },
+                                });
+
+                                if (!response.ok) {
+                                    this.setError();
+                                    await monday.execute("notice", {
+                                        message: this.loginError,
+                                        type: "error",
+                                        timeout: 10000,
+                                    });
+                                } else {
+                                    this.setSuccess();
+                                    await monday.execute("notice", {
+                                        message: this.loginSuccess,
+                                        type: "success",
+                                        timeout: 10000,
+                                    });
+                                }
+                            } else {
+                                this.setError();
+                            }
+                        } catch {
+                            this.setError();
+                        }
+                    });
+                    Alpine.store('htmxEventManager').addListener('htmx:beforeSwap', () => {
+                        Alpine.store('htmxEventManager').removeAllListeners();
+                    });
+                },
+            }
+        }
+    </script>
     <main x-data="loginUserData" class="flex flex-col justify-center items-center min-h-screen overflow-hidden" role="main">
         <div style="display: none;">
             <div id="ds-frame"></div>
@@ -33,9 +164,9 @@
                      th:data-text="${page?.data?.login?.addressText} ?: 'docspace.server.info'"
                 ></x-bold-text>
             </div>
-            <form class="bg-white p-8 rounded-lg shadow-lg"
+            <form class="p-8 rounded-lg shadow-lg"
                   :class="[
-                      $store?.darkMode?.on ? 'bg-background-dark' : 'bg-white'
+                      $store?.profile?.dark ? 'bg-dark' : 'bg-base'
                   ]"
                   style="width: 384px; transition: border-color 0.3s ease;"
                   @submit="toggleSubmit"
@@ -47,99 +178,4 @@
             </form>
         </div>
     </main>
-    <script>
-        function loginUserData() {
-            return {
-                admin: false,
-                login: true,
-                path: "/api/1.0/settings/login",
-                disabled: false,
-                loading: false,
-                error: false,
-                url: "[[${page?.data?.login?.url}]]",
-                email: "",
-                password: "",
-                loginError: "[[${page?.data?.login?.error ?: 'Login failed'}]]",
-                loginSuccess: "[[${page?.data?.login?.success ?: 'Login successful'}]]",
-                setError() {
-                    this.error = true;
-                    this.loading = false;
-                    this.disabled = false;
-                },
-                toggleSubmit() {
-                    this.disabled = true;
-                    this.loading = true;
-                },
-                init() {
-                    this.monday = mondaySdk();
-                    htmx.on('htmx:beforeRequest', async (evt) => {
-                        if (evt.detail.pathInfo.finalRequestPath !== this.path) {
-                            return;
-                        }
-
-                        evt.preventDefault();
-                        try {
-                            const timeout = setTimeout(() => this.setError(), 6500);
-                            const frame = window.DocSpace.SDK.initSystem({
-                                src: this.url,
-                                frameId: 'ds-frame',
-                                events: {
-                                    onAppReady: async () => {
-                                        try {
-                                            clearTimeout(timeout);
-                                            const settings = await DocSpace.SDK.frames['ds-frame'].getHashSettings();
-                                            const hash = await DocSpace.SDK.frames['ds-frame'].createHash(this.password, settings);
-                                            const login = await DocSpace.SDK.frames['ds-frame'].login(this.email, hash);
-                                            const me = await DocSpace.SDK.frames['ds-frame'].getUserInfo();
-                                            if (login && login.url) {
-                                                fetch(this.path, {
-                                                    method: 'POST',
-                                                    body: JSON.stringify({
-                                                        "docspace_user_id": me.id,
-                                                        "docspace_email": this.email,
-                                                        "docspace_hash": hash,
-                                                    }),
-                                                    headers: {
-                                                        ...evt.detail.requestConfig.headers,
-                                                        'Content-Type': 'application/json',
-                                                    },
-                                                }).then(response => {
-                                                    if (!response.ok) {
-                                                        this.monday.execute("notice", {
-                                                           message: this.loginError,
-                                                           type: "error",
-                                                           timeout: 10000,
-                                                        });
-                                                        throw new Error('Could not persist user credentials');
-                                                    } else {
-                                                        this.monday.execute("notice", {
-                                                           message: this.loginSuccess,
-                                                           type: "success",
-                                                           timeout: 10000,
-                                                        });
-                                                        location.reload();
-                                                    }
-                                                }).catch(error => {
-                                                    this.setError();
-                                                });
-                                            } else {
-                                                this.setError();
-                                            }
-                                        } catch (error) {
-                                            this.setError();
-                                        } finally {
-                                            await DocSpace.SDK.frames['ds-frame'].destroyFrame();
-                                        }
-                                    },
-                                    onAppError: (error) => this.setError()
-                                }
-                            });
-                        } catch {
-                            this.setError();
-                        }
-                    });
-                },
-            }
-        }
-    </script>
 </div>

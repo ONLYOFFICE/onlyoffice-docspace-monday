@@ -19,25 +19,25 @@
     >
         <div x-show="admin">
             <x-text-field
-                    id="docspace_url"
+                    id="docspace_admin_url"
                     name="url"
                     th:label="${page?.data?.settingsForm?.fields?.docSpaceLabel} ?: 'DocSpace Server Address'"
                     x-model="url"
                     th:placeholder="${page?.data?.settingsForm?.fields?.docSpacePlaceholder} ?: 'Please enter DocSpace address'"
                     pattern="https?:\/\/.*"
-                    classes="mb-4"
+                    classes="mb-4 h-11"
                     :disabled="login"
             ></x-text-field>
         </div>
         <div x-show="!admin" class="hidden">
             <x-text-field
-                    id="docspace_url"
+                    id="docspace_user_url"
                     name="url"
                     th:label="${page?.data?.settingsForm?.fields?.docSpaceLabel} ?: 'DocSpace Server Address'"
                     x-model="url"
                     th:placeholder="${page?.data?.settingsForm?.fields?.docSpacePlaceholder} ?: 'Please enter DocSpace address'"
                     pattern=".*"
-                    classes="mb-4"
+                    classes="mb-4 h-11"
             ></x-text-field>
         </div>
         <x-text-field
@@ -46,7 +46,7 @@
                 th:label="${page?.data?.settingsForm?.fields?.emailLabel ?: 'DocSpace Email'}"
                 x-model="email"
                 th:placeholder="${page?.data?.settingsForm?.fields?.emailPlaceholder ?: 'Please enter DocSpace email'}"
-                classes="mb-4"
+                classes="mb-4 h-11"
         ></x-text-field>
         <x-password-field
                 id="docspace_password"
@@ -54,7 +54,7 @@
                 th:label="${page?.data?.settingsForm?.fields?.passwordLabel ?: 'DocSpace Password'}"
                 x-model="password"
                 th:placeholder="${page?.data?.settingsForm?.fields?.passwordPlaceholder ?: 'Please enter DocSpace password'}"
-                classes="mb-4"
+                classes="mb-4 h-11"
         >
         </x-password-field>
     </div>

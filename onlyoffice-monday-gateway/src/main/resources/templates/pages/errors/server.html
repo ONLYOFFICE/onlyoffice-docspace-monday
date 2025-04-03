@@ -7,9 +7,14 @@
 
         <div th:replace="~{molecules/text/error}"></div>
     </div>
-    <div th:replace="~{atoms/logo/svg/hedgehog}"></div>
+    <div th:replace="~{atoms/logo/svg/horizontal}">
+    </div>
+    <div class="mt-5"
+         th:insert="~{atoms/logo/svg/hedgehog}">
+    </div>
     <x-error-text
-        th:header="${error?.header} ?: 'Server not found'"
-        th:subtext="${error?.text} ?: 'ONLYOFFICE DocSpace Server can't be reached. Please contact the administrator.'"
+        th:header="${page?.data?.error?.header}"
+        th:subtext="${page?.data?.error?.subtext}"
+        classes="mt-10"
     ></x-error-text>
 </div>

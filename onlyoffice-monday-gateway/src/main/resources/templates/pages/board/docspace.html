@@ -2,37 +2,52 @@
     <div>
         <div th:replace="~{atoms/text/bold}"></div>
         <div th:replace="~{atoms/text/generic}"></div>
+        <div th:replace="~{molecules/text/error}"></div>
     </div>
     <script>
         function docspaceManager() {
             return {
                 initialized: false,
+                appReady: false,
+                contentReady: false,
+                loggedIn: true,
+                unlinkRequired: false,
+                unlinking: false,
                 url: '[[${page?.data?.login?.url}]]',
-                boardId: -1,
                 roomId: '[[${page?.data?.docSpaceManager?.roomId}]]',
                 accessKey: '[[${page?.data?.docSpaceManager?.accessKey}]]',
-                notification: '[[${page?.data?.docSpaceManager?.notificationText}]]',
-                loggedIn: true,
+                socketHandler: async (evt) => {
+                    const monday = mondaySdk();
+                    const notification = '[[${page?.data?.docSpaceManager?.notificationText}]]';
+                    const { boardId } = (await monday.get("context")).data;
+                    const msg = JSON.parse(evt.detail.message);
+                    if (msg && msg.type == "refresh_access_token" && msg["board_id"] == boardId)
+                        await monday.execute("notice", {
+                            message: notification,
+                            type: "info",
+                            timeout: 10000,
+                        });
+                },
+                unlinkBoard: async () => {
+                    const monday = mondaySdk();
+                    const { boardId } = (await monday.get("context")).data;
+                    this.unlinking = true;
+                    await htmx.ajax('DELETE', `/api/1.0/rooms/${boardId}`, {
+                        target: 'body',
+                        swap: 'none',
+                    });
+                    this.unlinking = false;
+                },
                 async init() {
-                    const { boardId } = (await mondaySdk().get("context")).data;
-                    this.boardId = boardId;
-
-                    htmx.on("htmx:wsBeforeMessage", async (evt) => {
-                        const msg = JSON.parse(evt.detail.message);
-                        if (msg && msg.type == "refresh_access_token" && msg["board_id"] == this.boardId) {
-                            await mondaySdk().execute("notice", {
-                                message: this.notification,
-                                type: "info",
-                                timeout: 10000,
-                            });
-                            return;
-                        }
+                    Alpine.store('htmxEventManager').addListener("htmx:wsBeforeMessage", this.socketHandler);
+                    Alpine.store('htmxEventManager').addListener('htmx:beforeSwap', (evt) => {
+                        Alpine.store('htmxEventManager').removeAllListeners();
                     });
 
-                    const res = await mondaySdk().get("context");
-                    const { theme } = res.data;
-
                     if (this.initialized) return;
+
+                    const monday = mondaySdk();
+                    const { boardId, theme, user } = (await monday.get("context")).data;
 
                     window.DocSpace.SDK.initSystem({
                         src: this.url,
@@ -57,8 +72,32 @@
                                         theme: theme && theme === 'light' ? "Base" : "Dark",
                                         id: this.roomId,
                                         mode: this.accessKey ? "other" : "manager",
+                                        requestToken: this.accessKey,
+                                        events: {
+                                            onAppReady: () => { this.appReady = true; },
+                                            onNotFound: async () => {
+                                                if (user.isAdmin)
+                                                    this.unlinkRequired = true;
+                                            },
+                                            onContentReady: async () => {
+                                                this.contentReady = true;
+                                                const staleRoom = this.contentReady && !this.appReady;
+                                                if (staleRoom && user.isAdmin) {
+                                                    const { data } = await monday.execute("confirm", {
+                                                       message: this.unlinkMessageText,
+                                                       excludeCancelButton: false
+                                                    });
+
+                                                    if (data.confirm)
+                                                        htmx.ajax('DELETE', `/api/1.0/rooms/${boardId}`, {
+                                                            target: 'body',
+                                                            swap: 'none',
+                                                        });
+                                                }
+                                            },
+                                        },
                                         ...(this.accessKey
-                                            ? { rootPath: `/rooms/share?key=${this.accessKey}&folder=${this.roomId}&searchArea=3&page=1&sortby=DateAndTime&sortorder=descending` }
+                                            ? { rootPath: `/rooms/share` }
                                             : {})
                                     });
                                 } catch (error) {
@@ -72,8 +111,8 @@
             };
         }
     </script>
-    <main class="w-full h-screen" x-data="docspaceManager()">
-        <div class="h-full w-full" x-data="webSocketConfiguration" hx-ext="ws">
+    <main class="w-screen h-screen" x-data="docspaceManager()">
+        <div x-show="!unlinkRequired" class="h-full w-full">
             <div id="docspace-container" class="w-full h-full" x-show="loggedIn">
                 <div id="docspace" class="w-full h-full" x-show="loggedIn">
                     <div id="ds-frame" class="w-full h-full"></div>
@@ -86,7 +125,7 @@
                             th:data-text="${page?.data?.docSpaceManager?.welcomeText} ?: 'Welcome to DocSpace'"
                             classes="font-sans"
                             :class="[
-                                $store?.darkMode?.on ? 'text-white' : ''
+                                $store?.profile?.dark ? 'text-white' : ''
                             ]"
                     ></x-bold-text>
                 </div>
@@ -96,6 +135,31 @@
                             classes="font-sans"
                     ></x-generic-text>
                 </div>
+            </div>
+        </div>
+        <div x-show="unlinkRequired" class="flex flex-col justify-center items-center h-full w-full">
+            <div th:replace="~{atoms/logo/svg/horizontal}">
+            </div>
+            <div class="mt-5"
+                 th:insert="~{atoms/logo/svg/ant}"
+            ></div>
+            <x-error-text
+                    th:header="${page?.data?.docSpaceManager?.unlinkRoomHeader}"
+                    th:subtext="${page?.data?.docSpaceManager?.unlinkRoomText}"
+                    classes="mt-10"
+            ></x-error-text>
+            <div class="mt-4">
+                <button role="button"
+                        @click="unlinkBoard"
+                        class="flex overflow-hidden gap-2 items-center py-0.5 px-2 text-sm font-semibold leading-none text-subtext transition-colors whitespace-nowrap rounded-[3px]"
+                        :disabled="unlinking"
+                >
+                    <div th:replace="~{atoms/logo/svg/clear}"></div>
+                    <span th:text="${page?.data?.docSpaceManager?.unlinkText}"
+                          class="border-b border-dashed border-subtext inline-block"
+                    >
+                    </span>
+                </button>
             </div>
         </div>
     </main>

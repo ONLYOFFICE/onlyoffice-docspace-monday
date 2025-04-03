@@ -1,6 +1,5 @@
 <template x-component="primary-button">
     <button x-data="{
-                id: '',
                 type: $el.parentNode?.getAttribute('type') || 'button',
                 text: $el.parentNode?.getAttribute('text') || $el.parentNode?.getAttribute('data-text') || 'Button',
                 classes: $el.parentNode?.getAttribute('classes') || '',
@@ -10,13 +9,12 @@
                     }
                 }
             }"
-            :id="id"
             :type="type"
             x-text="text"
             :disabled="disabled"
-            class="rounded-md h-10 w-full mr-2 hover:shadow-lg duration-300 disabled:hover:shadow-none disabled:cursor-not-allowed"
+            class="rounded-[3px] h-11 w-full mr-2 hover:shadow-lg duration-300 disabled:hover:shadow-none disabled:cursor-not-allowed"
             :class="[
-                $store?.darkMode?.on ? 'bg-login-blue text-white disabled:bg-gray-400' : 'bg-login-blue text-white disabled:bg-gray-300',
+                $store?.profile?.dark ? 'bg-dark-login-blue text-white disabled:bg-color-disabled-dark' : 'bg-login-blue text-white disabled:bg-color-disabled',
                 classes
             ]"
     >

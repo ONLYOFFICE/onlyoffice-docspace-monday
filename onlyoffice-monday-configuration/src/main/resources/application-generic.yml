@@ -8,6 +8,7 @@ spring:
       - "classpath:application-rabbit.yml"
       - "classpath:application-redis.yml"
       - "classpath:application-security.yml"
+      - "classpath:hazelcast.yml"
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:default}
   shutdown: graceful

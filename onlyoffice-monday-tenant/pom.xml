@@ -11,6 +11,11 @@
         <version>1.0.0</version>
     </parent>
 
+    <properties>
+        <docker.image.name>onlyoffice/onlyoffice-monday-tenant:latest</docker.image.name>
+        <docker.image.port>7070</docker.image.port>
+    </properties>
+
     <dependencies>
         <!-- Internal Dependencies -->
         <dependency>
@@ -36,8 +41,9 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version>
         </dependency>
 
         <!-- Spring Cloud Dependencies -->
@@ -100,10 +106,12 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -200,6 +208,24 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib.plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>eclipse-temurin:21-jre</image>
+                    </from>
+                    <to>
+                        <image>${docker.image.name}</image>
+                    </to>
+                    <container>
+                        <ports>
+                            <port>${docker.image.port}</port>
+                        </ports>
+                    </container>
                 </configuration>
             </plugin>
         </plugins>

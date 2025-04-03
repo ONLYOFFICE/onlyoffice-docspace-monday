@@ -1,5 +1,9 @@
 <template x-component="input">
     <input
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="none"
+            spellcheck="false"
             x-data="() => ({
                 valid: true,
                 classes: $el.parentNode?.getAttribute('classes') || '',
@@ -30,11 +34,15 @@
             :value="value"
             x-model="value"
             class="px-3 py-2 border rounded-md w-full h-full focus:outline-none focus:ring-0 disabled:cursor-not-allowed"
-            :class="[
-                (valid && !error) ? 'border-gray-300' : 'border-red-500',
-                $store?.darkMode?.on ? 'bg-input-dark text-white disabled:bg-gray-400 disabled:text-gray-300' : 'disabled:bg-gray-100',
-                classes
-            ]"
+            :class="{
+                'border-input-border-dark': $store?.profile?.dark && valid && !error,
+                'border-input-border-dark-error': $store?.profile?.dark && (!valid || error),
+                'border-input-border': !$store?.profile?.dark && valid && !error,
+                'border-input-border-error': !$store?.profile?.dark && (!valid || error),
+                'bg-input-dark text-white disabled:bg-color-disabled-dark disabled:text-color-disabled-dark-text': $store?.profile?.dark,
+                'bg-input text-dark disabled:bg-color-disabled disabled:text-color-disabled-text': !$store?.profile?.dark,
+                [classes]: true
+            }"
             @input="error = false; valid = $el.checkValidity()"
             @blur="valid = $el.checkValidity()"
     />

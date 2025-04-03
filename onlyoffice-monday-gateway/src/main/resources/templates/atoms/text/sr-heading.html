@@ -1,8 +1,7 @@
 <template x-component="sr-heading">
     <h2 x-data="{
-            eid: '',
             text: $el.parentNode?.getAttribute('text') || $el.parentNode?.getAttribute('data-text') || '',
             classes: $el.parentNode?.getAttribute('classes') || ''
-        }" :id="eid" class="sr-only" x-text="text"
+        }" class="sr-only" x-text="text"
     ></h2>
 </template>

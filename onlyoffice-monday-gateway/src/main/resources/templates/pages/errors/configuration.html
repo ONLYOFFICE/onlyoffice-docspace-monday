@@ -8,18 +8,21 @@
     <script>
         function configurationErrorData() {
             return {
+                socketHandler: async (evt) => {
+                    try {
+                        const refresh = '[[${page?.data?.refresh}]]';
+                        const data = (await mondaySdk().get("context")).data;
+                        const msg = JSON.parse(evt.detail.message);
+                        if (msg && msg['tenant_id'] == data?.account?.id)
+                            htmx.ajax('GET', `${refresh}?boardId=${data?.boardId}`, { target: '#content', swap: 'innerHTML' });
+                    } catch(err) {
+                        console.error(err);
+                    }
+                },
                 async init() {
-                    const data = (await mondaySdk().get("context")).data;
-                    htmx.on('htmx:wsBeforeMessage', (evt) => {
-                        try {
-                            const msg = JSON.parse(evt.detail.message);
-                            if (msg && msg['tenant_id'] == data?.account?.id) {
-                                location.reload();
-                                return;
-                            }
-                        } catch(err) {
-                            return;
-                        }
+                    Alpine.store('htmxEventManager').addListener("htmx:wsBeforeMessage", this.socketHandler);
+                    Alpine.store('htmxEventManager').addListener('htmx:beforeSwap', (evt) => {
+                        Alpine.store('htmxEventManager').removeAllListeners();
                     });
                 }
             }
@@ -27,11 +30,12 @@
     </script>
     <template x-data="configurationErrorData"></template>
     <div th:replace="~{atoms/logo/svg/horizontal}"></div>
-    <div th:replace="~{atoms/logo/svg/owl}"></div>
+    <div class="mt-5"
+         th:insert="~{atoms/logo/svg/owl}">
+    </div>
     <x-error-text
-            x-data="webSocketConfiguration"
-            hx-ext="ws"
-            th:header="${page?.data?.error?.header} ?: 'Please wait'"
-            th:subtext="${page?.data?.error?.subtext} ?: 'Monday Administrator or Monday Member have to configure plugin first'"
+         th:header="${page?.data?.error?.header}"
+         th:subtext="${page?.data?.error?.subtext}"
+         classes="mt-10"
     ></x-error-text>
 </div>

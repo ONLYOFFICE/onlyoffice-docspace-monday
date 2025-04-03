@@ -1,0 +1,55 @@
+hazelcast:
+  cluster-name: onlyoffice-services
+  network:
+    join:
+      tcp-ip:
+        enabled: true
+        member-list:
+          - localhost
+      kubernetes:
+        enabled: false
+        namespace: default
+        service-name: onlyoffice-service
+  map:
+    users:
+      in-memory-format: BINARY
+      backup-count: 1
+      async-backup-count: 1
+      time-to-live-seconds: 180
+      max-idle-seconds: 180
+      eviction:
+        eviction-policy: LRU
+        max-size-policy: USED_HEAP_SIZE
+        size: 20
+      merge-policy:
+        batch-size: 100
+        class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+      cache-deserialized-values: INDEX_ONLY
+    boards:
+      in-memory-format: BINARY
+      backup-count: 1
+      async-backup-count: 1
+      time-to-live-seconds: 180
+      max-idle-seconds: 180
+      eviction:
+        eviction-policy: LRU
+        max-size-policy: USED_HEAP_SIZE
+        size: 20
+      merge-policy:
+        batch-size: 100
+        class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+      cache-deserialized-values: INDEX_ONLY
+    tenants:
+      in-memory-format: BINARY
+      backup-count: 1
+      async-backup-count: 1
+      time-to-live-seconds: 180
+      max-idle-seconds: 180
+      eviction:
+        eviction-policy: LRU
+        max-size-policy: USED_HEAP_SIZE
+        size: 20
+      merge-policy:
+        batch-size: 100
+        class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+      cache-deserialized-values: INDEX_ONLY

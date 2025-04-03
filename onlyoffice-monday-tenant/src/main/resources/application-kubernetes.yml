@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: onlyoffice-tenant
+  cache:
+    type: hazelcast
   cloud:
     kubernetes:
       discovery:
@@ -11,7 +13,7 @@ spring:
         enabled: true
     feign:
       client:
-        onlyoffice-user-name: onlyoffice-user
+        onlyoffice-user-name: ${SPRING_CLOUD_FEIGN_ONLYOFFICE_USER_NAME:onlyoffice-user}
     openfeign:
       circuitbreaker:
         enabled: true
@@ -85,6 +87,8 @@ resilience4j:
       registerRoom:
         baseConfig: defaultCommand
       registerTenant:
+        baseConfig: defaultCommand
+      removeRoom:
         baseConfig: defaultCommand
 info:
   app:

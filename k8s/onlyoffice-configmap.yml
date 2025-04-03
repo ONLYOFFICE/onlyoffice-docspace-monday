@@ -3,6 +3,7 @@ apiVersion: v1
 metadata:
   name: onlyoffice
 data:
+  server.origin: "https://monday.onlyoffice.com"
   spring.datasource.host: "postgres"
   spring.datasource.port: "5432"
   spring.datasource.url: "jdbc:postgresql://postgres:5432/monday"

@@ -8,29 +8,32 @@
     <script>
         function roomErrorData() {
             return {
+                socketHandler: async (evt) => {
+                    try {
+                        const refresh = '[[${page?.data?.refresh}]]';
+                        const { boardId } = (await mondaySdk().get("context")).data;
+                        const msg = JSON.parse(evt.detail.message);
+                        if (msg && msg['board_id'] == boardId)
+                            htmx.ajax('GET', `${refresh}?boardId=${boardId}`, { target: '#content', swap: 'innerHTML' });
+                    } catch(err) {
+                        console.error(err);
+                    }
+                },
                 async init() {
-                    const data = (await mondaySdk().get("context")).data;
-                    htmx.on('htmx:wsBeforeMessage', (evt) => {
-                        try {
-                            const msg = JSON.parse(evt.detail.message);
-                            if (msg && msg['tenant_id'] == data?.account?.id) {
-                                location.reload();
-                                return;
-                            }
-                        } catch(err) {
-                            return;
-                        }
-                    });
-                }
+                    Alpine.store('htmxEventManager').addNamedListener("autoRefresher", "htmx:wsBeforeMessage", this.socketHandler);
+                },
             }
         }
     </script>
     <template x-data="roomErrorData"></template>
-    <div th:replace="~{atoms/logo/svg/ant}"></div>
+    <div th:replace="~{atoms/logo/svg/horizontal}">
+    </div>
+    <div class="mt-5"
+         th:insert="~{atoms/logo/svg/ant}"
+    ></div>
     <x-error-text
-        x-data="webSocketConfiguration"
-        hx-ext="ws"
-        th:header="${page?.data?.error?.header} ?: 'Not Found'"
-        th:subtext="${page?.data?.error?.subtext} ?: 'The required room was not found. Please check if the room still exists or contact the administrator.'"
+        th:header="${page?.data?.error?.header}"
+        th:subtext="${page?.data?.error?.subtext}"
+        classes="mt-10"
     ></x-error-text>
 </div>

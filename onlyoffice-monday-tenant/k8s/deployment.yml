@@ -29,8 +29,21 @@ spec:
           ports:
             - containerPort: 7070
           env:
+            - name: SERVER_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: onlyoffice
+                  key: server.origin
             - name: SPRING_PROFILES_ACTIVE
               value: kubernetes
+            - name: HZ_NETWORK_JOIN_TCPIP_ENABLED
+              value: "false"
+            - name: HZ_NETWORK_JOIN_KUBERNETES_ENABLED
+              value: "true"
+            - name: HZ_NETWORK_JOIN_KUBERNETES_SERVICENAME
+              value: "onlyoffice-tenant"
+            - name: HZ_NETWORK_JOIN_KUBERNETES_NAMESPACE
+              value: "default"
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 configMapKeyRef:

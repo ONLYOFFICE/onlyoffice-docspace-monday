@@ -1,0 +1,181 @@
+Monday ONLYOFFICE DocSpace integration app uses code from the following 3rd party projects:
+
+spring data redis - This module provides integration with the Redis store. (https://github.com/spring-projects/spring-data-redis/blob/main/LICENSE.txt)
+License:        Apache 2.0
+License File:   spring-data-redis.license
+
+jackson-databind - This project contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor. (https://github.com/FasterXML/jackson-databind/blob/2.19/LICENSE)
+License:		Apache 2.0
+License File:	jackson-databind.license
+
+jakarta.validation-api - Jakarta Validation defines a metadata model and API for JavaBean and method validation. (https://github.com/jakartaee/validation/blob/main/license.txt)
+License:		Apache 2.0
+License File:	jakarta-validation.license
+
+hibernate-validator - Hibernate Validator - Jakarta Bean Validation Reference Implementation. (https://github.com/hibernate/hibernate-validator/blob/main/license.txt)
+License:		Apache 2.0
+License File:	hibernate-validator.license
+
+lombok			- Very spicy additions to the Java programming language. (https://github.com/projectlombok/lombok/blob/master/LICENSE)
+License:		MIT
+License File:	lombok.license
+
+spring cloud eureka server - Integration with Netflix OSS components. (https://github.com/spring-cloud/spring-cloud-netflix/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	eureka.license
+
+spring boot 	- Spring Boot helps you to create Spring-powered, production-grade applications and services with absolute minimum fuss. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+maven surefire plugin - The Surefire Plugin is used during the test phase of the build lifecycle to execute the unit tests of an application. (https://maven.apache.org/surefire-archives/surefire-2.19.1/maven-surefire-plugin/license.html)
+License:		Apache 2.0
+License File:	surefire.license
+
+thymeleaf extras - Thymeleaf "extras" integration module for Spring Security 3.x and 4.x. (https://github.com/thymeleaf/thymeleaf-extras-springsecurity/blob/3.1-master/LICENSE.txt)
+License:		Apache 2.0
+License File:	thymeleaf-extras.license
+
+spring boot starter security - Security Spring Boot starter. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+spring security oauth2 client - Spring Security provides security services for the Spring IO Platform. (https://github.com/spring-projects/spring-security/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-security.license
+
+spring security oauth2 jose - Spring Security provides security services for the Spring IO Platform. (https://github.com/spring-projects/spring-security/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-security.license
+
+spring boot starter cache - Caching starter for Spring Boot. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+caffeine		- A high performance caching library for Java. (https://github.com/ben-manes/caffeine/blob/master/LICENSE)
+License:		Apache 2.0
+License File:	caffeine.license
+
+spring cloud stream - Framework for building Event-Driven Microservices. (https://github.com/spring-cloud/spring-cloud-stream/blob/main/LICENSE)
+License:		Apache 2.0
+License File:	spring-cloud-stream.license
+
+spring cloud starter stream rabbit - RabbitMQ starter for Spring Could Stream. (https://github.com/spring-cloud/spring-cloud-stream/blob/main/LICENSE)
+License:		Apache 2.0
+License File:	spring-cloud-stream.license
+
+spring cloud starter openfeign - Support for using OpenFeign in Spring Cloud apps. (https://github.com/spring-cloud/spring-cloud-openfeign/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-cloud-feign.license
+
+spring cloud eureka client - Integration with Netflix OSS components. (https://github.com/spring-cloud/spring-cloud-netflix/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	eureka.license
+
+spring cloud kubernetes - Kubernetes integration with Spring Cloud Discovery Client, Configuration, etc. (https://github.com/spring-cloud/spring-cloud-kubernetes/blob/main/LICENSE)
+License:		Apache 2.0
+License File:	spring-cloud-kubernetes.license
+
+spring cloud loadbalancer - Spring Load Balancer. (https://github.com/spring-cloud/spring-cloud-commons/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-commons.license
+
+spring cloud circuitbreaker	- Spring Cloud Circuit Breaker API and Implementations. (https://github.com/spring-cloud/spring-cloud-circuitbreaker/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-circuitbreaker.license
+
+resilience4j	- Resilience4j is a fault tolerance library designed for Java8 and functional programming. (https://github.com/resilience4j/resilience4j/blob/master/LICENSE.txt)
+License:		Apache 2.0
+License File:	resilience4j.license
+
+bucket4j		- Java rate limiting library based on token-bucket algorithm. (https://github.com/bucket4j/bucket4j/blob/master/LICENSE.txt)
+License:		Apache 2.0
+License File:	bucket4j.license
+
+spring boot actuator - Actuator starter for Spring Boot. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+micrometer		- An application observability facade for the most popular observability tools. Think SLF4J, but for observability. (https://github.com/micrometer-metrics/micrometer/blob/main/LICENSE)
+License:		Apache 2.0
+License File:	micrometer.license
+
+opentelemetry	- OpenTelemetry Java SDK
+License:		Apache 2.0
+License File:	opentelemetry.license
+
+feign micrometer - Feign makes writing java http clients easier. (https://github.com/OpenFeign/feign/blob/master/LICENSE)
+License:		Apache 2.0
+License File:	feign-micrometer.license
+
+spring boot configuration processor - Spring Boot Configuration Processor. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+spring boot starter aop - Spring Boot AOP Processing. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+spring boot starter test - Testing for Spring Boot. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+junit			- The 5th major version of the programmer-friendly testing framework for Java and the JVM. (https://github.com/junit-team/junit5/blob/main/LICENSE.md)
+License:		EPL 2.0
+License File:	junit.license
+
+frontend maven plugin - "Maven-node-grunt-gulp-npm-node-plugin to end all maven-node-grunt-gulp-npm-plugins." A Maven plugin that downloads/installs Node and NPM locally, runs NPM install, Grunt, Gulp and/or Karma. (https://github.com/eirslett/frontend-maven-plugin/blob/master/LICENSE)
+License:		Apache 2.0
+License File:	frontend-maven-plugin.license
+
+jib maven plugin - Build container images for your Java applications. (https://github.com/GoogleContainerTools/jib/blob/master/LICENSE)
+License:		Apache 2.0
+License File:	jib-maven-plugin.license
+
+camel spring boot - Runs Camel on Spring Boot and provides starters for Camel components. (https://github.com/apache/camel-spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	camel-spring-boot.license
+
+camel			- Apache Camel is an open source integration framework that empowers you to quickly and easily integrate various systems consuming or producing data. (https://github.com/apache/camel/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	camel.license
+
+hazelcast spring - Hazelcast is a unified real-time data platform combining stream processing with a fast data store, allowing customers to act instantly on data-in-motion for real-time insights. (https://github.com/hazelcast/hazelcast/blob/master/LICENSE)
+License:		Apache 2.0
+License File:	hazelcast.license
+
+feign jackson	- Feign Jackson Codec. (https://github.com/OpenFeign/feign/blob/master/LICENSE)
+License:		Apache 2.0
+License File:	feign-jackson.license
+
+spring boot data jpa - Spring Data. (https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+License:		Apache 2.0
+License File:	spring-boot.license
+
+postgresql		- Postgresql JDBC Driver. (https://github.com/pgjdbc/pgjdbc/blob/master/LICENSE)
+License:		BSD 2-Clause
+License File:	postgresql.license
+
+flyway			- Flyway by Redgate • Database Migrations Made Easy. (https://github.com/flyway/flyway/blob/main/LICENSE.md)
+License:		Apache 2.0
+License File:	flyway.license
+
+spring retry	- This project provides declarative retry support for Spring applications. (https://github.com/spring-projects/spring-retry/blob/main/LICENSE-2.0.txt)
+License:		Apache 2.0
+License File:	spring-retry.license
+
+datasource micrometer - Micrometer Observation API instrumentation and Spring Boot 3 Auto-Configuration for JDBC APIs. (https://github.com/jdbc-observations/datasource-micrometer/blob/main/LICENSE)
+License:		Apache 2.0
+License File: 	datasource-micrometer.license
+
+testcontainers	- Testcontainers is a Java library that supports JUnit tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container. (https://github.com/testcontainers/testcontainers-java/blob/main/LICENSE)
+License:		MIT
+License File:	testcontainers.license
+
+logstash logback encoder - Logback JSON encoder and appenders. (https://github.com/logfellow/logstash-logback-encoder/blob/main/LICENSE)
+License:		Apache 2.0
+License File:	logstash-logback-encoder.license
+
+fmt maven plugin - Opinionated Maven Plugin that formats your Java code. (https://github.com/spotify/fmt-maven-plugin/blob/main/LICENSE)
+License:		MIT
+License File:	fmt-maven-plugin.license

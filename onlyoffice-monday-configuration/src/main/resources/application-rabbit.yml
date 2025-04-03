@@ -4,3 +4,6 @@ spring:
     port: ${SPRING_RABBITMQ_PORT:5672}
     username: ${SPRING_RABBITMQ_USERNAME:guest}
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    virtualhost: ${SPRING_RABBITMQ_VIRTUALHOST:/}
+    ssl:
+      enabled: ${SPRING_RABBITMQ_SSL_ENABLED:false}

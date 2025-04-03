@@ -5,9 +5,9 @@
                 classes: $el.parentNode?.getAttribute('classes') || ''
             }"
             x-text="text"
-            class="text-xs text-subtext"
+            class="text-xs"
             :class="[
-                $store?.darkMode?.on ? 'text-slate-50' : '',
+                $store?.profile?.dark ? 'text-subtext-dark' : 'text-subtext',
                 classes
             ]"
     ></span>

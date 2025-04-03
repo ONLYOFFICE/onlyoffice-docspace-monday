@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: onlyoffice-tenant
+  cache:
+    type: hazelcast
   cloud:
     kubernetes:
       discovery:
@@ -11,10 +13,16 @@ spring:
         enabled: false
     feign:
       client:
-        onlyoffice-user-name: ONLYOFFICE-USER
+        onlyoffice-user-name: ${SPRING_CLOUD_FEIGN_ONLYOFFICE_USER_NAME:ONLYOFFICE-USER}
     openfeign:
       circuitbreaker:
         enabled: true
+      client:
+        config:
+          default:
+            connectTimeout: 2250
+            readTimeout: 3000
+            loggerLevel: basic
   config:
     import:
       - "classpath:application-generic.yml"
@@ -29,6 +37,16 @@ eureka:
   client:
     enabled: true
 resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 3s
+        cancelRunningFuture: true
+    instances:
+      docSpaceClientTimeLimiter:
+        baseConfig: default
+      userServiceTimeLimiter:
+        baseConfig: default
   circuitbreaker:
     configs:
       default:
@@ -86,6 +104,18 @@ resilience4j:
         baseConfig: defaultCommand
       registerTenant:
         baseConfig: defaultCommand
+      removeRoom:
+        baseConfig: defaultCommand
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+    instances:
+      docSpaceClientBulkhead:
+        baseConfig: default
+      userServiceBulkhead:
+        baseConfig: default
 info:
   app:
     name: "onlyoffice-tenant"

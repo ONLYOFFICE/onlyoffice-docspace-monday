@@ -37,6 +37,9 @@
 		<bucket4j.version>7.6.1</bucket4j.version>
 		<camel.version>4.3.0</camel.version>
 		<datasource.micrometer.version>1.0.5</datasource.micrometer.version>
+		<flyway.version>11.1.0</flyway.version>
+		<hazelcast.version>5.4.0</hazelcast.version>
+		<jib.plugin.version>3.4.1</jib.plugin.version>
 		<logstack.logback.encoder.version>8.0</logstack.logback.encoder.version>
 		<maven.formatter.plugin.version>2.24</maven.formatter.plugin.version>
 		<maven.jib.plugin.version>3.4.4</maven.jib.plugin.version>
@@ -112,6 +115,11 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>${jib.plugin.version}</version>
 			</plugin>
 		</plugins>
 	</build>

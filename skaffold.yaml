@@ -4,22 +4,15 @@ metadata:
   name: onlyoffice-monday
 build:
   artifacts:
-    - image: onlyoffice-monday-user
-      context: onlyoffice-monday-user
-      docker:
-        dockerfile: onlyoffice-monday-user/Dockerfile
-    - image: onlyoffice-monday-tenant
-      context: onlyoffice-monday-tenant
-      docker:
-        dockerfile: onlyoffice-monday-tenant/Dockerfile
-    - image: onlyoffice-monday-notification
-      context: onlyoffice-monday-notification
-      docker:
-        dockerfile: onlyoffice-monday-notification/Dockerfile
     - image: onlyoffice-monday-gateway
-      context: onlyoffice-monday-gateway
-      docker:
-        dockerfile: onlyoffice-monday-gateway/Dockerfile
+      jib:
+        project: com.onlyoffice:onlyoffice-monday-gateway
+    - image: onlyoffice-monday-tenant
+      jib:
+        project: com.onlyoffice:onlyoffice-monday-tenant
+    - image: onlyoffice-monday-user
+      jib:
+        project: com.onlyoffice:onlyoffice-monday-user
 manifests:
   rawYaml:
     - k8s/ingress.yml
@@ -35,7 +28,6 @@ manifests:
     - k8s/rabbit-service.yml
     - k8s/redis-deployment.yml
     - k8s/redis-service.yml
-    - onlyoffice-monday-user/k8s/**.yml
-    - onlyoffice-monday-tenant/k8s/**.yml
-    - onlyoffice-monday-notification/k8s/**.yml
     - onlyoffice-monday-gateway/k8s/**.yml
+    - onlyoffice-monday-tenant/k8s/**.yml
+    - onlyoffice-monday-user/k8s/**.yml

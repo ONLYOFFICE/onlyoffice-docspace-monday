@@ -11,6 +11,12 @@
         <version>1.0.0</version>
     </parent>
 
+    <properties>
+        <docker.image.name>onlyoffice/onlyoffice-monday-gateway:latest</docker.image.name>
+        <docker.image.port>3030</docker.image.port>
+        <frontend.maven.plugin.version>1.15.1</frontend.maven.plugin.version>
+    </properties>
+
     <dependencies>
         <!-- Internal Dependencies -->
         <dependency>
@@ -212,6 +218,67 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${frontend.maven.plugin.version}</version>
+                <configuration>
+                    <workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>
+                    <installDirectory>${project.basedir}/src/main/frontend/node</installDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v20.15.1</nodeVersion>
+                            <npmVersion>10.7.0</npmVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install</arguments>
+                            <workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                            <workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib.plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>eclipse-temurin:21-jre</image>
+                    </from>
+                    <to>
+                        <image>${docker.image.name}</image>
+                    </to>
+                    <container>
+                        <ports>
+                            <port>${docker.image.port}</port>
+                        </ports>
+                    </container>
                 </configuration>
             </plugin>
         </plugins>

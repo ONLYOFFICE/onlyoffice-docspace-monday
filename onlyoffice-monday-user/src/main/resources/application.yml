@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: onlyoffice-user
+  cache:
+    type: hazelcast
   cloud:
     kubernetes:
       discovery:
