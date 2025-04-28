@@ -43,6 +43,19 @@ services:
     networks:
       - monday_network
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - monday_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.82.0
     restart: always
