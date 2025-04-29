@@ -88,7 +88,7 @@ public class SettingsController {
   @Secured("ROLE_ADMIN")
   public ResponseEntity<?> saveSettings(
       @AuthenticationPrincipal MondayAuthenticationPrincipal user,
-      @RequestBody SaveSettingsCommand body) {
+      @RequestBody @Valid SaveSettingsCommand body) {
     try {
       MDC.put("tenant_id", String.valueOf(user.getAccountId()));
       MDC.put("user_id", String.valueOf(user.getUserId()));
