@@ -46,8 +46,8 @@ public class BasicUserQueryService implements UserQueryService {
   @Cacheable(value = "users", key = "#query.tenantId+#query.mondayId", unless = "#result == null")
   public UserCredentials findUser(@Valid FindUser query) {
     try {
-      MDC.put("tenant_id", String.valueOf(query.getTenantId()));
-      MDC.put("monday_id", String.valueOf(query.getMondayId()));
+      MDC.put("tenantId", String.valueOf(query.getTenantId()));
+      MDC.put("userId", String.valueOf(query.getMondayId()));
       log.info("Trying to find tenant user by id");
 
       var user =
@@ -74,9 +74,8 @@ public class BasicUserQueryService implements UserQueryService {
   public UserCredentials findUser(@Valid FindUser query, @Positive int timeout) {
     var leastTimeout = Math.min(timeout, 3500);
     try {
-      MDC.put("tenant_id", String.valueOf(query.getTenantId()));
-      MDC.put("monday_id", String.valueOf(query.getMondayId()));
-      MDC.put("timeout", String.valueOf(timeout));
+      MDC.put("tenantId", String.valueOf(query.getTenantId()));
+      MDC.put("userId", String.valueOf(query.getMondayId()));
       log.info("Trying to find tenant user by id with timeout");
 
       return CompletableFuture.supplyAsync(
@@ -105,7 +104,7 @@ public class BasicUserQueryService implements UserQueryService {
       if (e.getCause() instanceof UserNotFoundException) throw (UserNotFoundException) e.getCause();
       throw new ExecutionTimeoutException(e);
     } catch (InterruptedException | TimeoutException e) {
-      log.error("Could not find tenant user by id", e);
+      log.error("Could not find tenant user by id: {}", e.getMessage());
       throw new ExecutionTimeoutException(e);
     } finally {
       MDC.clear();
@@ -114,7 +113,7 @@ public class BasicUserQueryService implements UserQueryService {
 
   public DocSpaceUsers findDocSpaceUsers(@Valid FindDocSpaceUsers query) {
     try {
-      MDC.put("tenant_id", String.valueOf(query.getTenantId()));
+      MDC.put("tenantId", String.valueOf(query.getTenantId()));
       log.info("Trying to find DocSpace users by tenant_id");
 
       var ids =
@@ -134,8 +133,7 @@ public class BasicUserQueryService implements UserQueryService {
 
   public DocSpaceUsers findDocSpaceUsers(@Valid FindDocSpaceUsers query, @Positive int timeout) {
     try {
-      MDC.put("tenant_id", String.valueOf(query.getTenantId()));
-      MDC.put("timeout", String.valueOf(timeout));
+      MDC.put("tenantId", String.valueOf(query.getTenantId()));
       log.info("Trying to find DocSpace users by tenant_id with timeout");
 
       var ids =

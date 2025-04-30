@@ -11,35 +11,21 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.onlyoffice.gateway.security;
+package com.onlyoffice.tenant.security;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.onlyoffice.common.logging.UserPrincipal;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Implementation of the UserPrincipal interface for the tenant service. Since tenant service might
+ * not have an actual user authentication system, this is a simple implementation that can be used
+ * for service-to-service communication.
+ */
 @Getter
 @Builder
-@JsonDeserialize(using = MondayAuthenticationPrincipalDeserializer.class)
-public class MondayAuthenticationPrincipal implements UserPrincipal {
+public class TenantUserPrincipal implements UserPrincipal {
   private long userId;
   private long accountId;
-  private String slug;
-  private boolean isAdmin;
-  private boolean isViewOnly;
-  private boolean isGuest;
-  private String email;
-  private String name;
-
-  public String getRole() {
-    if (isAdmin) {
-      return "ADMIN";
-    } else if (isViewOnly) {
-      return "VIEW_ONLY";
-    } else if (isGuest) {
-      return "GUEST";
-    } else {
-      return "USER";
-    }
-  }
+  private String role;
 }

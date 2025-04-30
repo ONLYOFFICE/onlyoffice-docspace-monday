@@ -54,9 +54,8 @@ public class BasicBoardCommandService implements BoardCommandService {
   @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public void register(@Valid RegisterRoom command, @NotNull Set<String> docSpaceUsers) {
     try {
-      MDC.put("tenant_id", String.valueOf(command.getTenantId()));
-      MDC.put("board_id", String.valueOf(command.getBoardId()));
-      MDC.put("room_id", String.valueOf(command.getRoomId()));
+      MDC.put("boardId", String.valueOf(command.getBoardId()));
+      MDC.put("roomId", String.valueOf(command.getRoomId()));
       log.info("Registering a board room");
 
       var now = System.currentTimeMillis();
@@ -98,7 +97,7 @@ public class BasicBoardCommandService implements BoardCommandService {
               .type(OutboxType.INVITE)
               .build());
     } catch (JsonProcessingException e) {
-      log.error("Could not perform json serialization", e);
+      log.error("Could not perform json serialization: {}", e.getMessage());
       throw new OutboxSerializationException(e);
     } finally {
       MDC.clear();
@@ -109,8 +108,7 @@ public class BasicBoardCommandService implements BoardCommandService {
   @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public void remove(@Valid RemoveRoom command) {
     try {
-      MDC.put("tenant_id", String.valueOf(command.getTenantId()));
-      MDC.put("board_id", String.valueOf(command.getBoardId()));
+      MDC.put("boardId", String.valueOf(command.getBoardId()));
       log.info("Unlinking room from a board");
       boardRepository.deleteById(command.getBoardId());
     } finally {

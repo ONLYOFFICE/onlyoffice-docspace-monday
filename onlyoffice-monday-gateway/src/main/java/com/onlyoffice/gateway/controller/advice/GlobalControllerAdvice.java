@@ -204,7 +204,7 @@ public class GlobalControllerAdvice {
    */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<?> handleGenericException(Exception ex) {
-    log.error("Unhandled exception", ex);
+    log.error("Unhandled exception: {}", ex.getMessage());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 }

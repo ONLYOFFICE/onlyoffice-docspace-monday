@@ -50,10 +50,9 @@ public class BasicTenantCommandService implements TenantCommandService {
   @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)
   public TenantCredentials register(@Valid RegisterTenant command) {
     try {
-      MDC.put("tenant_id", String.valueOf(command.getId()));
-      MDC.put("monday_user_id", String.valueOf(command.getMondayUserId()));
-      MDC.put("docSpace_user_id", command.getDocSpaceUserId());
-      MDC.put("docSpace_url", command.getUrl());
+      MDC.put("userId", String.valueOf(command.getMondayUserId()));
+      MDC.put("docspaceUserId", command.getDocSpaceUserId());
+      MDC.put("docspaceUrl", command.getUrl());
       log.info("Registering a new user entry");
 
       var now = System.currentTimeMillis();
@@ -92,7 +91,7 @@ public class BasicTenantCommandService implements TenantCommandService {
 
       return TenantCredentials.builder().id(tenant.getId()).build();
     } catch (JsonProcessingException e) {
-      log.error("Could not perform json serialization", e);
+      log.error("Could not perform json serialization: {}", e.getMessage());
       throw new OutboxSerializationException(e);
     } finally {
       MDC.clear();
@@ -104,7 +103,6 @@ public class BasicTenantCommandService implements TenantCommandService {
   public boolean remove(RemoveTenant command) {
     var tenant = tenantRepository.getReferenceById(command.getTenantId());
     try {
-      MDC.put("tenant_id", String.valueOf(command.getTenantId()));
       tenantRepository.delete(tenant);
       outboxRepository.save(
           Outbox.builder()
@@ -119,10 +117,10 @@ public class BasicTenantCommandService implements TenantCommandService {
               .build());
       return true;
     } catch (JsonProcessingException e) {
-      log.warn("Could not perform json serialization", e);
+      log.error("Could not perform json serialization: {}", e.getMessage());
       return false;
     } catch (Exception e) {
-      log.warn("Could not remove current tenant", e);
+      log.error("Could not remove current tenant: {}", e.getMessage());
       return false;
     } finally {
       MDC.clear();

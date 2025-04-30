@@ -35,7 +35,6 @@ public class BasicTenantQueryService implements TenantQueryService {
   @Cacheable(value = "tenants", key = "#query.id")
   public TenantCredentials find(@Valid FindEntity query) {
     try {
-      MDC.put("tenant_id", String.valueOf(query.getId()));
       log.info("Trying to find tenant credentials by tenant id");
 
       var tenant =

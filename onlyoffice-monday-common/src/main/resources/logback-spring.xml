@@ -1,27 +1,53 @@
 <configuration>
     <!-- Include the common logging configuration -->
-    <include resource="common-logback.xml"/>
     <springProfile name="default,d,dev,develop,development">
         <include resource="org/springframework/boot/logging/logback/base.xml"/>
     </springProfile>
-    <springProfile name="prod,production,p,kubernetes,performance">
+    <springProfile name="p,prod,production,performance,kubernetes">
         <logger name="org.hibernate" level="OFF" />
         <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeContext>false</includeContext>
+                <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
                 <includeMdc>true</includeMdc>
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>spanId</includeMdcKeyName>
+                <includeMdcKeyName>tenantId</includeMdcKeyName>
+                <includeMdcKeyName>boardId</includeMdcKeyName>
+                <includeMdcKeyName>roomId</includeMdcKeyName>
+                <includeMdcKeyName>userId</includeMdcKeyName>
+                <includeMdcKeyName>userRole</includeMdcKeyName>
+                <includeMdcKeyName>docspaceUserId</includeMdcKeyName>
+                <includeMdcKeyName>docspaceUrl</includeMdcKeyName>
+                <includeMdcKeyName>ip</includeMdcKeyName>
+                <includeMdcKeyName>httpMethod</includeMdcKeyName>
+                <includeMdcKeyName>method</includeMdcKeyName>
+                <includeMdcKeyName>uri</includeMdcKeyName>
                 <fieldNames>
-                    <timestamp>timestamp</timestamp>
-                    <message>message</message>
-                    <logger>logger</logger>
-                    <thread>thread</thread>
                     <level>level</level>
+                    <logger>sourceContext</logger>
+                    <timestamp>date</timestamp>
+                    <thread>threadId</thread>
                     <levelValue>[ignore]</levelValue>
-                    <version>[ignore]</version>
+                    <protocol>[ignore]</protocol>
+                    <status_code>[ignore]</status_code>
+                    <requested_url>[ignore]</requested_url>
+                    <remote_host>[ignore]</remote_host>
+                    <remote_user>[ignore]</remote_user>
+                    <content_length>[ignore]</content_length>
                 </fieldNames>
+                <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                    <rootCauseFirst>true</rootCauseFirst>
+                    <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                    <shortenedClassNameLength>25</shortenedClassNameLength>
+                </throwableConverter>
             </encoder>
         </appender>
+        <appender name="jsonConsoleAppenderAsync" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+            <appender-ref ref="jsonConsoleAppender" />
+        </appender>
         <root level="INFO">
-            <appender-ref ref="jsonConsoleAppender"/>
+            <appender-ref ref="jsonConsoleAppenderAsync"/>
         </root>
     </springProfile>
 </configuration>
