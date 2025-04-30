@@ -13,18 +13,15 @@
  */
 package com.onlyoffice.common.logging.aspect;
 
-import com.onlyoffice.common.logging.UserPrincipal;
 import com.onlyoffice.common.logging.UserPrincipalResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -41,9 +38,7 @@ public class GenericLoggingAspect {
   private final UserPrincipalResolver userPrincipalResolver;
   private static final String UNKNOWN = "unknown";
 
-  /**
-   * Record to store HTTP request information.
-   */
+  /** Record to store HTTP request information. */
   private record RequestInfo(String ipAddress, String method, String uri) {}
 
   /**
@@ -83,9 +78,7 @@ public class GenericLoggingAspect {
     return executeJoinPoint(joinPoint, "Authentication failed: {}");
   }
 
-  /**
-   * Sets up MDC with request information.
-   */
+  /** Sets up MDC with request information. */
   private void setupMdc(ProceedingJoinPoint joinPoint) {
     var requestInfo = extractRequestInfo();
     var methodName = joinPoint.getSignature().getName();
@@ -96,10 +89,9 @@ public class GenericLoggingAspect {
     MDC.put("uri", requestInfo.uri());
   }
 
-  /**
-   * Executes the join point and handles exception logging.
-   */
-  private Object executeJoinPoint(ProceedingJoinPoint joinPoint, String errorMessage) throws Throwable {
+  /** Executes the join point and handles exception logging. */
+  private Object executeJoinPoint(ProceedingJoinPoint joinPoint, String errorMessage)
+      throws Throwable {
     try {
       return joinPoint.proceed();
     } catch (Exception e) {
@@ -110,9 +102,7 @@ public class GenericLoggingAspect {
     }
   }
 
-  /**
-   * Extracts HTTP request information.
-   */
+  /** Extracts HTTP request information. */
   private RequestInfo extractRequestInfo() {
     var ipAddress = UNKNOWN;
     var requestMethod = UNKNOWN;
@@ -133,17 +123,15 @@ public class GenericLoggingAspect {
     return new RequestInfo(ipAddress, requestMethod, requestURI);
   }
 
-  /**
-   * Logs method argument types for debugging.
-   */
+  /** Logs method argument types for debugging. */
   private void logMethodArguments(ProceedingJoinPoint joinPoint) {
     var args = joinPoint.getArgs();
     if (args != null && args.length > 0) {
       var argsTypes =
-              Arrays.stream(args)
-                      .map(arg -> arg == null ? "null" : arg.getClass().getSimpleName())
-                      .reduce((a, b) -> a + ", " + b)
-                      .orElse("");
+          Arrays.stream(args)
+              .map(arg -> arg == null ? "null" : arg.getClass().getSimpleName())
+              .reduce((a, b) -> a + ", " + b)
+              .orElse("");
       log.debug("Method argument types: {}", argsTypes);
     }
   }
@@ -153,17 +141,16 @@ public class GenericLoggingAspect {
     try {
       var authentication = SecurityContextHolder.getContext().getAuthentication();
       if (authentication != null) {
-        var userPrincipal =
-                userPrincipalResolver.resolveUserPrincipal(authentication);
+        var userPrincipal = userPrincipalResolver.resolveUserPrincipal(authentication);
 
         userPrincipal.ifPresent(
-                user -> {
-                  MDC.put("tenantId", String.valueOf(user.getAccountId()));
-                  MDC.put("userId", String.valueOf(user.getUserId()));
+            user -> {
+              MDC.put("tenantId", String.valueOf(user.getAccountId()));
+              MDC.put("userId", String.valueOf(user.getUserId()));
 
-                  var role = user.getRole();
-                  if (role != null) MDC.put("userRole", role);
-                });
+              var role = user.getRole();
+              if (role != null) MDC.put("userRole", role);
+            });
       }
     } catch (Exception e) {
       log.warn("Could not set user info in MDC", e);

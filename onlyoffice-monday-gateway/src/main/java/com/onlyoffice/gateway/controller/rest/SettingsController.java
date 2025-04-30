@@ -26,14 +26,13 @@ import com.onlyoffice.gateway.security.MondayAuthenticationPrincipal;
 import com.onlyoffice.gateway.transport.rest.request.LoginUserCommand;
 import com.onlyoffice.gateway.transport.rest.request.SaveSettingsCommand;
 import jakarta.validation.Valid;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.function.Consumer;
 
 @Slf4j
 @RestController

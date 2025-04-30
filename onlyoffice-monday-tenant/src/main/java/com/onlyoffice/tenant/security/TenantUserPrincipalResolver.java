@@ -15,22 +15,19 @@ package com.onlyoffice.tenant.security;
 
 import com.onlyoffice.common.logging.UserPrincipal;
 import com.onlyoffice.common.logging.UserPrincipalResolver;
+import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.Optional;
-
-
 /**
  * Implementation of {@link UserPrincipalResolver} for the tenant service.
- * <p>
- * This resolver extracts tenant/user information from the authentication context.
- * Since the tenant service may not have direct user authentication, it attempts to
- * derive identity information from authentication details or headers and falls back
- * to system values when necessary.
- * </p>
+ *
+ * <p>This resolver extracts tenant/user information from the authentication context. Since the
+ * tenant service may not have direct user authentication, it attempts to derive identity
+ * information from authentication details or headers and falls back to system values when
+ * necessary.
  *
  * @see UserPrincipal
  * @see UserPrincipalResolver
@@ -38,34 +35,29 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class TenantUserPrincipalResolver implements UserPrincipalResolver {
-  /**
-   * Identifier used for system-level operations when no specific user is authenticated.
-   */
+  /** Identifier used for system-level operations when no specific user is authenticated. */
   private static final long SYSTEM_ID = -1;
 
-  /**
-   * Role assigned to system-level operations.
-   */
+  /** Role assigned to system-level operations. */
   private static final String SYSTEM_ROLE = "SERVICE";
 
   /**
    * Resolves user principal information from the provided authentication object.
-   * <p>
-   * The resolution follows this sequence:
+   *
+   * <p>The resolution follows this sequence:
+   *
    * <ol>
-   *   <li>If authentication is null, returns empty</li>
-   *   <li>If authentication principal is already a UserPrincipal, returns it</li>
-   *   <li>If authentication details contain a map with user/tenant info, extracts it</li>
-   *   <li>Falls back to a system principal with any available tenant ID</li>
+   *   <li>If authentication is null, returns empty
+   *   <li>If authentication principal is already a UserPrincipal, returns it
+   *   <li>If authentication details contain a map with user/tenant info, extracts it
+   *   <li>Falls back to a system principal with any available tenant ID
    * </ol>
-   * </p>
    *
    * @param authentication The authentication object from which to extract user information
    * @return An Optional containing the resolved UserPrincipal if successful, empty otherwise
    */
   public Optional<UserPrincipal> resolveUserPrincipal(Authentication authentication) {
-    if (authentication == null)
-      return Optional.empty();
+    if (authentication == null) return Optional.empty();
 
     if (authentication.getPrincipal() instanceof UserPrincipal principal)
       return Optional.of(principal);
@@ -73,19 +65,18 @@ public class TenantUserPrincipalResolver implements UserPrincipalResolver {
     if (authentication.getDetails() instanceof Map<?, ?> details) {
       try {
         var extractedPrincipal = extractFromDetailsMap(details);
-        if (extractedPrincipal.isPresent())
-          return extractedPrincipal;
+        if (extractedPrincipal.isPresent()) return extractedPrincipal;
       } catch (Exception e) {
         log.debug("Could not extract user principal from authentication details", e);
       }
     }
 
     return Optional.of(
-            TenantUserPrincipal.builder()
-                    .userId(SYSTEM_ID)
-                    .accountId(extractTenantId(authentication))
-                    .role(SYSTEM_ROLE)
-                    .build());
+        TenantUserPrincipal.builder()
+            .userId(SYSTEM_ID)
+            .accountId(extractTenantId(authentication))
+            .role(SYSTEM_ROLE)
+            .build());
   }
 
   /**
@@ -96,18 +87,17 @@ public class TenantUserPrincipalResolver implements UserPrincipalResolver {
    */
   private Optional<UserPrincipal> extractFromDetailsMap(Map<?, ?> details) {
     var tenantId = getDetailAsLong(details, "tenantId", "tenant_id", "accountId", "account_id");
-    if (tenantId == null)
-      return Optional.empty();
+    if (tenantId == null) return Optional.empty();
 
     var userId = getDetailAsLong(details, "userId", "user_id");
     var role = getDetailAsString(details, "role", "userRole", "user_role");
 
     return Optional.of(
-            TenantUserPrincipal.builder()
-                    .userId(userId != null ? userId : SYSTEM_ID)
-                    .accountId(tenantId)
-                    .role(role)
-                    .build());
+        TenantUserPrincipal.builder()
+            .userId(userId != null ? userId : SYSTEM_ID)
+            .accountId(tenantId)
+            .role(role)
+            .build());
   }
 
   /**
@@ -144,8 +134,7 @@ public class TenantUserPrincipalResolver implements UserPrincipalResolver {
   private String getDetailAsString(Map<?, ?> details, String... keys) {
     for (var key : keys) {
       var value = details.get(key);
-      if (value instanceof String stringValue)
-        return stringValue;
+      if (value instanceof String stringValue) return stringValue;
     }
 
     return null;
@@ -160,8 +149,7 @@ public class TenantUserPrincipalResolver implements UserPrincipalResolver {
   private long extractTenantId(Authentication authentication) {
     if (authentication.getDetails() instanceof Map<?, ?> details) {
       var tenantId = getDetailAsLong(details, "tenantId", "tenant_id", "accountId", "account_id");
-      if (tenantId != null)
-        return tenantId;
+      if (tenantId != null) return tenantId;
     }
 
     return SYSTEM_ID;

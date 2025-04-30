@@ -21,10 +21,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 /**
- * Resolver that extracts a UserPrincipal from Gateway-specific authentication objects.
- * This implementation is specifically designed to work with the Monday authentication
- * mechanism and extracts user principals from Authentication objects that contain
- * a MondayAuthenticationPrincipal.
+ * Resolver that extracts a UserPrincipal from Gateway-specific authentication objects. This
+ * implementation is specifically designed to work with the Monday authentication mechanism and
+ * extracts user principals from Authentication objects that contain a
+ * MondayAuthenticationPrincipal.
  */
 @Component
 public class GatewayUserPrincipalResolver implements UserPrincipalResolver {
@@ -33,13 +33,13 @@ public class GatewayUserPrincipalResolver implements UserPrincipalResolver {
    * Resolves a UserPrincipal from the provided Authentication object.
    *
    * @param authentication The Spring Security Authentication object to extract the principal from.
-   *                      Can be null, in which case an empty Optional is returned.
+   *     Can be null, in which case an empty Optional is returned.
    * @return An Optional containing the UserPrincipal if the authentication contains a
-   *         MondayAuthenticationPrincipal, or an empty Optional otherwise.
+   *     MondayAuthenticationPrincipal, or an empty Optional otherwise.
    */
   public Optional<UserPrincipal> resolveUserPrincipal(Authentication authentication) {
     if (authentication != null
-            && authentication.getPrincipal() instanceof MondayAuthenticationPrincipal) {
+        && authentication.getPrincipal() instanceof MondayAuthenticationPrincipal) {
       return Optional.of((MondayAuthenticationPrincipal) authentication.getPrincipal());
     }
     return Optional.empty();

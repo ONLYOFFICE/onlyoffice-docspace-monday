@@ -16,6 +16,8 @@ package com.onlyoffice.gateway.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.common.client.notification.factory.NotificationProcessor;
 import com.onlyoffice.gateway.transport.websocket.SessionToken;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +31,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
