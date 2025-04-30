@@ -54,6 +54,7 @@ public class BasicBoardCommandService implements BoardCommandService {
   @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public void register(@Valid RegisterRoom command, @NotNull Set<String> docSpaceUsers) {
     try {
+      MDC.put("tenantId", String.valueOf(command.getTenantId()));
       MDC.put("boardId", String.valueOf(command.getBoardId()));
       MDC.put("roomId", String.valueOf(command.getRoomId()));
       log.info("Registering a board room");
@@ -108,8 +109,10 @@ public class BasicBoardCommandService implements BoardCommandService {
   @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public void remove(@Valid RemoveRoom command) {
     try {
+      MDC.put("tenantId", String.valueOf(command.getTenantId()));
       MDC.put("boardId", String.valueOf(command.getBoardId()));
       log.info("Unlinking room from a board");
+
       boardRepository.deleteById(command.getBoardId());
     } finally {
       MDC.clear();

@@ -50,6 +50,7 @@ public class BasicTenantCommandService implements TenantCommandService {
   @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)
   public TenantCredentials register(@Valid RegisterTenant command) {
     try {
+      MDC.put("tenantId", String.valueOf(command.getId()));
       MDC.put("userId", String.valueOf(command.getMondayUserId()));
       MDC.put("docspaceUserId", command.getDocSpaceUserId());
       MDC.put("docspaceUrl", command.getUrl());
@@ -101,6 +102,9 @@ public class BasicTenantCommandService implements TenantCommandService {
   @CacheEvict(value = "tenants", key = "#command.tenantId")
   @Transactional(timeout = 2, rollbackFor = Exception.class)
   public boolean remove(RemoveTenant command) {
+    MDC.put("tenantId", String.valueOf(command.getTenantId()));
+    log.info("Removing a tenant");
+
     var tenant = tenantRepository.getReferenceById(command.getTenantId());
     try {
       tenantRepository.delete(tenant);
