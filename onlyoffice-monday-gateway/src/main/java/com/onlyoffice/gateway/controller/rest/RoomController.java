@@ -23,7 +23,6 @@ import com.onlyoffice.gateway.security.MondayAuthenticationPrincipal;
 import com.onlyoffice.gateway.transport.rest.request.CreateRoomCommand;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -47,52 +46,41 @@ public class RoomController {
   public ResponseEntity<?> createRoom(
       @AuthenticationPrincipal MondayAuthenticationPrincipal user,
       @ModelAttribute CreateRoomCommand body) {
-    try {
-      MDC.put("tenant_id", String.valueOf(user.getAccountId()));
-      MDC.put("board_id", String.valueOf(body.getBoardId()));
-      MDC.put("user_id", String.valueOf(user.getUserId()));
-      if (!tenantService.findTenant(user.getAccountId()).getStatusCode().is2xxSuccessful()) {
-        log.warn("Could not find tenant");
-        return ResponseEntity.badRequest().build();
-      }
-
-      var response =
-          tenantService.createRoom(
-              RegisterRoom.builder()
-                  .boardId(body.getBoardId())
-                  .tenantId(user.getAccountId())
-                  .roomId(body.getRoomId())
-                  .mondayUsers(body.getUsers())
-                  .build());
-
-      log.info("Board room has been registered");
-
-      messagePublisher.accept(
-          RoomCreated.builder().tenantId(user.getAccountId()).boardId(body.getBoardId()).build());
-
-      log.debug("Room created notification has been sent");
-
-      return ResponseEntity.status(response.getStatusCode().value())
-          .header("HX-Refresh", "true")
-          .build();
-    } finally {
-      MDC.clear();
+    if (!tenantService.findTenant(user.getAccountId()).getStatusCode().is2xxSuccessful()) {
+      log.warn("Could not find tenant for this user");
+      return ResponseEntity.badRequest().build();
     }
+
+    var response =
+        tenantService.createRoom(
+            RegisterRoom.builder()
+                .boardId(body.getBoardId())
+                .tenantId(user.getAccountId())
+                .roomId(body.getRoomId())
+                .mondayUsers(body.getUsers())
+                .build());
+
+    log.info("User has registered a new room");
+
+    messagePublisher.accept(
+        RoomCreated.builder().tenantId(user.getAccountId()).boardId(body.getBoardId()).build());
+
+    log.debug("Room created notification has been sent");
+
+    return ResponseEntity.status(response.getStatusCode().value())
+        .header("HX-Refresh", "true")
+        .build();
   }
 
   @Secured("ROLE_ADMIN")
   @DeleteMapping("/{boardId}")
   public ResponseEntity<?> unlinkRoom(
       @AuthenticationPrincipal MondayAuthenticationPrincipal user, @PathVariable long boardId) {
-    try {
-      var response =
-          tenantService.removeRoom(
-              RemoveRoom.builder().tenantId(user.getAccountId()).boardId(boardId).build());
-      return ResponseEntity.status(response.getStatusCode().value())
-          .header("HX-Refresh", "true")
-          .build();
-    } finally {
-      MDC.clear();
-    }
+    var response =
+        tenantService.removeRoom(
+            RemoveRoom.builder().tenantId(user.getAccountId()).boardId(boardId).build());
+    return ResponseEntity.status(response.getStatusCode().value())
+        .header("HX-Refresh", "true")
+        .build();
   }
 }

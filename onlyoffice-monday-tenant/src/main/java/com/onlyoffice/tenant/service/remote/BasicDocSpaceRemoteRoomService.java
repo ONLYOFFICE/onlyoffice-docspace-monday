@@ -80,7 +80,7 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
       var boardsCache = cacheManager.getCache("boards");
       if (boardsCache != null) boardsCache.evict(payload.getBoardId());
 
-      MDC.put("board_id", String.valueOf(payload.getBoardId()));
+      MDC.put("boardId", String.valueOf(payload.getBoardId()));
       log.info("Refreshing access key for current board");
 
       var board =
@@ -144,8 +144,7 @@ public class BasicDocSpaceRemoteRoomService implements DocSpaceRemoteRoomService
     try {
       var payload = command.getPayload();
 
-      MDC.put("tenant_id", String.valueOf(payload.getTenantId()));
-      MDC.put("room_id", String.valueOf(payload.getRoomId()));
+      MDC.put("roomId", String.valueOf(payload.getRoomId()));
       log.info("Inviting users to DocSpace");
 
       var tenant =

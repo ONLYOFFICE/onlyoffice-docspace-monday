@@ -11,20 +11,21 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.onlyoffice.gateway.transport.rest.request;
+package com.onlyoffice.tenant.security;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import java.util.Set;
-import lombok.*;
+import com.onlyoffice.common.logging.UserPrincipal;
+import lombok.Builder;
+import lombok.Getter;
 
+/**
+ * Implementation of the UserPrincipal interface for the tenant service. Since tenant service might
+ * not have an actual user authentication system, this is a simple implementation that can be used
+ * for service-to-service communication.
+ */
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateRoomCommand {
-  @Positive private long boardId;
-  @Positive private long roomId;
-  @NotNull private Set<String> users;
+public class TenantUserPrincipal implements UserPrincipal {
+  private long userId;
+  private long accountId;
+  private String role;
 }

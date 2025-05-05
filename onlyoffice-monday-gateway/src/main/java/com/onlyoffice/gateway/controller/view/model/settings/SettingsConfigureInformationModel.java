@@ -31,7 +31,7 @@ public class SettingsConfigureInformationModel {
   @Builder.Default
   private String credentialsSecond = "and add the following credentials to the allow list:";
 
-  @Builder.Default private String monday = "Monday portal address:";
+  @Builder.Default private String monday = "monday portal address:";
   private String mondayAddress;
   @Builder.Default private String app = "ONLYOFFICE DocSpace app:";
   private String appAddress;

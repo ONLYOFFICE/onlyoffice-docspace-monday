@@ -14,6 +14,9 @@
 package com.onlyoffice.gateway.transport.rest.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Getter
@@ -22,12 +25,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginUserCommand {
+  @NotBlank(message = "DocSpace user ID is required")
+  @Pattern(regexp = "^[\\w\\-]+$", message = "DocSpace user ID contains invalid characters")
   @JsonProperty("docspace_user_id")
   private String docSpaceUserId;
 
+  @NotBlank(message = "DocSpace email is required")
+  @Email(message = "Invalid email format")
   @JsonProperty("docspace_email")
   private String docSpaceEmail;
 
+  @NotBlank(message = "DocSpace hash is required")
   @JsonProperty("docspace_hash")
   private String docSpaceHash;
 }

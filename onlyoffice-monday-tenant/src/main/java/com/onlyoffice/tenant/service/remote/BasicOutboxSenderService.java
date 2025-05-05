@@ -47,17 +47,17 @@ public class BasicOutboxSenderService implements OutboxSenderService {
     var processedOutboxes = new ArrayList<Outbox>();
     for (var outbox : outboxList) {
       try {
-        MDC.put("outbox_id", outbox.getId());
-        MDC.put("outbox_type", outbox.getType().name());
-        log.info("Sending an outbox payload");
+        MDC.put("outboxId", outbox.getId());
+        MDC.put("outboxType", outbox.getType().name());
+        log.debug("Sending an outbox payload");
 
         bridge.send(getBinding(outbox.getType()), getBindingPayload(outbox));
         processedOutboxes.add(outbox);
       } catch (JsonProcessingException e) {
-        log.error("Could not process a JSON outbox entry", e);
+        log.error("Could not process a JSON outbox entry: {}", e.getMessage());
         processedOutboxes.add(outbox);
       } catch (Exception e) {
-        log.error("Unexpected error processing outbox", e);
+        log.error("Unexpected error processing outbox: {}", e.getMessage());
       } finally {
         MDC.clear();
       }

@@ -48,6 +48,7 @@
 
                     const monday = mondaySdk();
                     const { boardId, theme, user } = (await monday.get("context")).data;
+                    await monday.execute('valueCreatedForUser');
 
                     window.DocSpace.SDK.initSystem({
                         src: this.url,

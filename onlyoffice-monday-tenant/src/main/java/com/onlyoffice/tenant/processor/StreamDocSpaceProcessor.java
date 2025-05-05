@@ -41,7 +41,7 @@ public class StreamDocSpaceProcessor implements DocSpaceProcessor {
   public Consumer<CommandMessage<RefreshAccessKey>> refreshKeyConsumer() {
     return (msg) -> {
       var event = service.refreshAccessKey(msg);
-      log.info("Sending an access key refreshed notification");
+      log.debug("Sending an access key refreshed notification");
       messagePublisher.accept(
           AccessKeyRefreshed.builder()
               .tenantId(event.getTenantId())

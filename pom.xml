@@ -29,13 +29,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.5</version>
+		<version>3.4.5</version>
 		<relativePath/>
 	</parent>
 
 	<properties>
 		<bucket4j.version>7.6.1</bucket4j.version>
-		<camel.version>4.3.0</camel.version>
+		<camel.version>4.11.0</camel.version>
 		<datasource.micrometer.version>1.0.5</datasource.micrometer.version>
 		<flyway.version>11.1.0</flyway.version>
 		<hazelcast.version>5.4.0</hazelcast.version>
@@ -44,9 +44,9 @@
 		<maven.formatter.plugin.version>2.24</maven.formatter.plugin.version>
 		<maven.jib.plugin.version>3.4.4</maven.jib.plugin.version>
 		<maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
-		<opentelemetry.version>1.31.0</opentelemetry.version>
+		<opentelemetry.version>1.34.0</opentelemetry.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
-		<spring.cloud.version>2023.0.3</spring.cloud.version>
+		<spring.cloud.version>2024.0.1</spring.cloud.version>
 		<java.version>21</java.version>
 	</properties>
 

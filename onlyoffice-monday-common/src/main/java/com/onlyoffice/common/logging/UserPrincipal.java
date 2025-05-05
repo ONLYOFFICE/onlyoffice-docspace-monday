@@ -11,20 +11,31 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.onlyoffice.gateway.transport.rest.request;
+package com.onlyoffice.common.logging;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import java.util.Set;
-import lombok.*;
+/**
+ * Interface representing a user principal with common properties needed for logging. Services
+ * should implement or adapt to this interface to enable consistent logging.
+ */
+public interface UserPrincipal {
+  /**
+   * Gets the ID of the user.
+   *
+   * @return The user ID
+   */
+  long getUserId();
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateRoomCommand {
-  @Positive private long boardId;
-  @Positive private long roomId;
-  @NotNull private Set<String> users;
+  /**
+   * Gets the account/tenant ID the user belongs to.
+   *
+   * @return The account/tenant ID
+   */
+  long getAccountId();
+
+  /**
+   * Gets the user's role.
+   *
+   * @return The user's role or null if not available
+   */
+  String getRole();
 }

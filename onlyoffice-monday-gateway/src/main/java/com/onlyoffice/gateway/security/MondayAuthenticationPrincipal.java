@@ -14,17 +14,32 @@
 package com.onlyoffice.gateway.security;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.onlyoffice.common.logging.UserPrincipal;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
 @JsonDeserialize(using = MondayAuthenticationPrincipalDeserializer.class)
-public class MondayAuthenticationPrincipal {
+public class MondayAuthenticationPrincipal implements UserPrincipal {
   private long userId;
   private long accountId;
   private String slug;
   private boolean isAdmin;
   private boolean isViewOnly;
   private boolean isGuest;
+  private String email;
+  private String name;
+
+  public String getRole() {
+    if (isAdmin) {
+      return "ADMIN";
+    } else if (isViewOnly) {
+      return "VIEW_ONLY";
+    } else if (isGuest) {
+      return "GUEST";
+    } else {
+      return "USER";
+    }
+  }
 }
