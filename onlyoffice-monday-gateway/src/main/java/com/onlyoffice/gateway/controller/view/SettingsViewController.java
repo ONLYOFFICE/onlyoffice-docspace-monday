@@ -48,14 +48,14 @@ public class SettingsViewController {
 
   @GetMapping
   public ModelAndView renderSettings(@AuthenticationPrincipal MondayAuthenticationPrincipal user) {
-    log.debug("Rendering settings page");
+    log.info("Rendering settings page for current user");
     return getSettingsView(user, false);
   }
 
   @Secured("ROLE_ADMIN")
   @GetMapping("/change")
   public ModelAndView renderChange(@AuthenticationPrincipal MondayAuthenticationPrincipal user) {
-    log.debug("Rendering change page");
+    log.info("Rendering change page for current user");
     return renderAdminConfigureView(user.getSlug(), true);
   }
 

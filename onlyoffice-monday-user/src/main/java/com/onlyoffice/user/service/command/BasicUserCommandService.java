@@ -50,9 +50,9 @@ public class BasicUserCommandService implements UserCommandService {
   public void register(@Valid @NotNull RegisterUser payload) {
     try {
       var now = System.currentTimeMillis();
-      MDC.put("tenant_id", String.valueOf(payload.getTenantId()));
-      MDC.put("monday_id", String.valueOf(payload.getMondayId()));
-      MDC.put("docSpace_id", String.valueOf(payload.getDocSpaceId()));
+      MDC.put("tenantId", String.valueOf(payload.getTenantId()));
+      MDC.put("userId", String.valueOf(payload.getMondayId()));
+      MDC.put("docspaceUserId", String.valueOf(payload.getDocSpaceId()));
       log.info("Registering a new user set of credentials");
 
       userRepository
@@ -92,9 +92,9 @@ public class BasicUserCommandService implements UserCommandService {
   public void register(@Valid @NotNull CommandMessage<RegisterUser> command) {
     try {
       var payload = command.getPayload();
-      MDC.put("tenant_id", String.valueOf(payload.getTenantId()));
-      MDC.put("monday_id", String.valueOf(payload.getMondayId()));
-      MDC.put("docSpace_id", String.valueOf(payload.getDocSpaceId()));
+      MDC.put("tenantId", String.valueOf(payload.getTenantId()));
+      MDC.put("userId", String.valueOf(payload.getMondayId()));
+      MDC.put("docspaceUserId", String.valueOf(payload.getDocSpaceId()));
       log.info("Registering a new user set of credentials asynchronously");
 
       var template = new TransactionTemplate(platformTransactionManager);
@@ -151,7 +151,7 @@ public class BasicUserCommandService implements UserCommandService {
   public void removeAll(@Valid @NotNull CommandMessage<RemoveTenantUsers> command) {
     try {
       var payload = command.getPayload();
-      MDC.put("tenant_id", String.valueOf(payload.getTenantId()));
+      MDC.put("tenantId", String.valueOf(payload.getTenantId()));
       log.info("Removing all tenant users");
 
       var cache = cacheManager.getCache("users");

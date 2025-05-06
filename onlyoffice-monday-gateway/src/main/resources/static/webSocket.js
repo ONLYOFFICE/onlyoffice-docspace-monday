@@ -36,6 +36,11 @@ function webSocketConfiguration() {
         }
       },
       async init() {
+        htmx.config.wsReconnectDelay = (retryCount) => {
+          const delay = retryCount * 1000;
+          return Math.min(delay, 10000);
+        };
+        
         const sessionToken = await this.getSessionToken();
         if (sessionToken) {
           this.isConnected = true;

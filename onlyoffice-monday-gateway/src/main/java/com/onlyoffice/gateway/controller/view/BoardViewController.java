@@ -77,6 +77,7 @@ public class BoardViewController implements InitializingBean, DisposableBean {
   public ModelAndView renderBoard(
       @RequestParam("boardId") long boardId,
       @AuthenticationPrincipal MondayAuthenticationPrincipal user) {
+    log.info("Rendering board page for current user");
     return getBoardView(boardId, user, false);
   }
 

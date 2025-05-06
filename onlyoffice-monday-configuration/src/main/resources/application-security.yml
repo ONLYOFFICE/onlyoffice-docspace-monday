@@ -5,8 +5,8 @@ spring:
         registration:
           monday:
             provider: monday
-            clientId: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_MONDAY_CLIENT_ID:}
-            clientSecret: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_MONDAY_CLIENT_SECRET:}
+            clientId: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_MONDAY_CLIENT_ID:a8905774f24402f400def0b7d0c04262}
+            clientSecret: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_MONDAY_CLIENT_SECRET:cee6257ed8a72c32f31162a20a0b777f}
             encryptionSecret: ${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_MONDAY_ENCRYPTION_SECRET:secret}
             authorizationGrantType: authorization_code
             redirectUri: "${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_MONDAY_REDIRECT_URI:{baseUrl}/oauth2/code/monday}"

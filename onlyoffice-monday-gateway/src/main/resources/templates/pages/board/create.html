@@ -27,6 +27,19 @@
                 },
                 createRoom() {
                     this.disable();
+                    const methodTimeout = setTimeout(async () => {
+                        this.enable();
+                        this.onAppReadyProcessed = false;
+                        if (DocSpace.SDK.frames['ds-frame'])
+                            await DocSpace.SDK.frames['ds-frame'].destroyFrame();
+                        await mondaySdk().execute("notice", {
+                            message: this.timeoutError,
+                            type: "error",
+                            timeout: 10000,
+                        });
+                        htmx.ajax('GET', `/views/refresh?boardId=${boardId}`, { target: '#content', swap: 'innerHTML' });
+                    }, 15000);
+                    
                     const monday = mondaySdk();
                     const frame = window.DocSpace.SDK.initManager({
                         src: this.url,
@@ -53,6 +66,7 @@
                                 const board = boardResponse?.data?.boards?.[0];
                                 if (!board) {
                                     this.enable();
+                                    clearTimeout(methodTimeout);
                                     return;
                                 }
 
@@ -82,6 +96,7 @@
                                         if (roomResult?.value?.status == 402) {
                                             this.enable();
                                             this.onAppReadyProcessed = false;
+                                            clearTimeout(methodTimeout);
                                             await monday.execute("notice", {
                                                 message: this.roomsQuotaError,
                                                 type: "error",
@@ -90,6 +105,7 @@
                                         } else {
                                             this.enable();
                                             this.onAppReadyProcessed = false;
+                                            clearTimeout(methodTimeout);
                                             await monday.execute("notice", {
                                                 message: this.operationError,
                                                 type: "error",
@@ -99,7 +115,7 @@
                                         return;
                                     }
 
-                                    const link = await docSpace.addTagsToRoom(roomResult.value.id, [mondayTag, composeTag]);
+                                    const link = await withTimeout(docSpace.addTagsToRoom(roomResult.value.id, [mondayTag, composeTag]), 2250);
                                     if (!link?.id)
                                         throw new Error("Could not create a new room");
 
@@ -111,9 +127,12 @@
                                             roomId: roomResult?.value?.id,
                                             users: ids,
                                         },
+                                    }).then(() => {
+                                        clearTimeout(methodTimeout);
                                     }).catch(async (error) => {
                                         this.enable();
                                         this.onAppReadyProcessed = false;
+                                        clearTimeout(methodTimeout);
                                         await monday.execute("notice", {
                                             message: this.operationError,
                                             type: "error",
@@ -123,6 +142,7 @@
                                 } catch (error) {
                                     this.enable();
                                     this.onAppReadyProcessed = false;
+                                    clearTimeout(methodTimeout);
                                     await monday.execute("notice", {
                                         message: this.timeoutError,
                                         type: "error",
@@ -133,6 +153,8 @@
                                 }
                             },
                             onAppError: (error) => {
+                                clearTimeout(methodTimeout);
+                                
                                 if (/\(CSP\)/.test(error)) {
                                     mondaySdk().execute("notice", {
                                         message: this.cspError,

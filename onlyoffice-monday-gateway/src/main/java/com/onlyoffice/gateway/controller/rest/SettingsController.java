@@ -28,14 +28,12 @@ import com.onlyoffice.gateway.transport.rest.request.SaveSettingsCommand;
 import jakarta.validation.Valid;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-// TODO: MDC Aspect
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1.0/settings")
@@ -60,77 +58,58 @@ public class SettingsController {
   public ResponseEntity<?> login(
       @AuthenticationPrincipal MondayAuthenticationPrincipal user,
       @RequestBody @Valid LoginUserCommand body) {
-    try {
-      MDC.put("tenant_id", String.valueOf(user.getAccountId()));
-      MDC.put("user_id", String.valueOf(user.getUserId()));
-      log.info("User attempts to persist login information");
+    log.info("User attempts to persist login information");
 
-      var response =
-          userService.registerUser(
-              RegisterUser.builder()
-                  .mondayId(user.getUserId())
-                  .tenantId(user.getAccountId())
-                  .docSpaceId(body.getDocSpaceUserId())
-                  .email(body.getDocSpaceEmail())
-                  .hash(encryptionService.encrypt(body.getDocSpaceHash()))
-                  .build());
+    var response =
+        userService.registerUser(
+            RegisterUser.builder()
+                .mondayId(user.getUserId())
+                .tenantId(user.getAccountId())
+                .docSpaceId(body.getDocSpaceUserId())
+                .email(body.getDocSpaceEmail())
+                .hash(encryptionService.encrypt(body.getDocSpaceHash()))
+                .build());
 
-      if (!response.getStatusCode().is2xxSuccessful())
-        return ResponseEntity.status(response.getStatusCode()).header("HX-Refresh", "true").build();
+    if (!response.getStatusCode().is2xxSuccessful())
+      return ResponseEntity.status(response.getStatusCode()).header("HX-Refresh", "true").build();
 
-      return ResponseEntity.status(HttpStatus.OK).header("HX-Refresh", "true").build();
-    } finally {
-      MDC.clear();
-    }
+    return ResponseEntity.status(HttpStatus.OK).header("HX-Refresh", "true").build();
   }
 
   @PostMapping
   @Secured("ROLE_ADMIN")
   public ResponseEntity<?> saveSettings(
       @AuthenticationPrincipal MondayAuthenticationPrincipal user,
-      @RequestBody SaveSettingsCommand body) {
-    try {
-      MDC.put("tenant_id", String.valueOf(user.getAccountId()));
-      MDC.put("user_id", String.valueOf(user.getUserId()));
-      log.info("User attempts to save tenant DocSpace credentials");
+      @RequestBody @Valid SaveSettingsCommand body) {
+    log.info("User attempts to save tenant DocSpace credentials");
 
-      var response =
-          tenantService.createTenant(
-              RegisterTenant.builder()
-                  .id(user.getAccountId())
-                  .mondayUserId(user.getUserId())
-                  .url(body.getDocSpaceUrl())
-                  .docSpaceUserId(body.getDocSpaceUserId())
-                  .adminLogin(body.getDocSpaceEmail())
-                  .adminHash(encryptionService.encrypt(body.getDocSpaceHash()))
-                  .build());
+    var response =
+        tenantService.createTenant(
+            RegisterTenant.builder()
+                .id(user.getAccountId())
+                .mondayUserId(user.getUserId())
+                .url(body.getDocSpaceUrl())
+                .docSpaceUserId(body.getDocSpaceUserId())
+                .adminLogin(body.getDocSpaceEmail())
+                .adminHash(encryptionService.encrypt(body.getDocSpaceHash()))
+                .build());
 
-      if (!response.getStatusCode().is2xxSuccessful()) {
-        log.error("Could not save tenant DocSpace credentials");
-        return ResponseEntity.status(response.getStatusCode()).build();
-      }
-
-      messagePublisher.accept(TenantChanged.builder().tenantId(user.getAccountId()).build());
-      log.debug("Tenant changed notification has been sent");
-
-      return ResponseEntity.ok().header("HX-Refresh", "true").build();
-    } finally {
-      MDC.clear();
+    if (!response.getStatusCode().is2xxSuccessful()) {
+      log.error("Could not save tenant DocSpace credentials");
+      return ResponseEntity.status(response.getStatusCode()).build();
     }
+
+    messagePublisher.accept(TenantChanged.builder().tenantId(user.getAccountId()).build());
+    log.debug("Tenant changed notification has been sent");
+
+    return ResponseEntity.ok().header("HX-Refresh", "true").build();
   }
 
   @DeleteMapping
   @Secured("ROLE_ADMIN")
   public ResponseEntity<?> removeTenant(
       @AuthenticationPrincipal MondayAuthenticationPrincipal user) {
-    try {
-      MDC.put("tenant_id", String.valueOf(user.getAccountId()));
-      MDC.put("user_id", String.valueOf(user.getUserId()));
-      log.info("User attempts to save change DocSpace tenant");
-      return tenantService.removeTenant(
-          RemoveTenant.builder().tenantId(user.getAccountId()).build());
-    } finally {
-      MDC.clear();
-    }
+    log.info("User attempts to save change DocSpace tenant");
+    return tenantService.removeTenant(RemoveTenant.builder().tenantId(user.getAccountId()).build());
   }
 }

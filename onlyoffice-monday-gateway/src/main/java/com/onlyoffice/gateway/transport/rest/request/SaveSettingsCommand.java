@@ -14,6 +14,9 @@
 package com.onlyoffice.gateway.transport.rest.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.onlyoffice.common.validation.Url;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
@@ -23,14 +26,20 @@ import lombok.*;
 @AllArgsConstructor
 public class SaveSettingsCommand {
   @JsonProperty("docspace_url")
+  @NotBlank(message = "DocSpace url is required")
+  @Url(message = "DocSpace url must be a valid and safe URL")
   private String docSpaceUrl;
 
   @JsonProperty("docspace_user_id")
+  @NotBlank(message = "DocSpace user id is required")
   private String docSpaceUserId;
 
   @JsonProperty("docspace_email")
+  @NotBlank(message = "DocSpace user email is required")
+  @Email(message = "Invalid email format")
   private String docSpaceEmail;
 
   @JsonProperty("docspace_hash")
+  @NotBlank(message = "DocSpace user hash is required")
   private String docSpaceHash;
 }

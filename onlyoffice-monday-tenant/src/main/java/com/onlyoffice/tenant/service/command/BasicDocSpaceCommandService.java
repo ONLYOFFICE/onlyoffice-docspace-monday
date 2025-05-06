@@ -39,8 +39,8 @@ public class BasicDocSpaceCommandService implements DocSpaceCommandService {
   @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public void register(@Valid RegisterDocSpace command) {
     try {
-      MDC.put("tenant_id", String.valueOf(command.getTenantId()));
-      MDC.put("docspace_url", command.getUrl());
+      MDC.put("tenantId", String.valueOf(command.getTenantId()));
+      MDC.put("docspaceUrl", command.getUrl());
       log.info("Registering new DocSpace credentials for this tenant");
 
       var tenant =

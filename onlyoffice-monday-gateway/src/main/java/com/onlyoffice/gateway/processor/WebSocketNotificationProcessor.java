@@ -48,7 +48,6 @@ public class WebSocketNotificationProcessor extends TextWebSocketHandler
   public void afterConnectionClosed(
       @NotNull WebSocketSession session, @NotNull CloseStatus status) {
     try {
-      setMdcForSession(session);
       log.debug("Removing websocket session from current instance registry");
 
       sessions.remove(session);
@@ -57,7 +56,6 @@ public class WebSocketNotificationProcessor extends TextWebSocketHandler
     }
   }
 
-  @Override
   public void onMessage(Message message, byte[] pattern) {
     broadcast(new String(message.getBody()));
   }
@@ -74,7 +72,7 @@ public class WebSocketNotificationProcessor extends TextWebSocketHandler
       if (tenantId != -1 && isSessionEligible(session, tenantId))
         sendNotification(session, textMessage, tenantId);
     } catch (Exception e) {
-      log.error("Could not notify a session", e);
+      log.error("Could not notify a session: {}", e.getMessage());
     } finally {
       MDC.clear();
     }
@@ -84,7 +82,7 @@ public class WebSocketNotificationProcessor extends TextWebSocketHandler
     try {
       return mapper.readTree(message).get("tenant_id").asInt();
     } catch (Exception e) {
-      log.error("Failed to extract tenant ID from message", e);
+      log.error("Failed to extract tenant id from message: {}", e.getMessage());
       return -1;
     }
   }
@@ -108,25 +106,18 @@ public class WebSocketNotificationProcessor extends TextWebSocketHandler
       var sessionToken = mapper.convertValue(claims.get("dat"), SessionToken.class);
       return sessionToken.getAccountId() == tenantId;
     } catch (Exception e) {
-      log.error("Token verification failed for tenant ID", e);
+      log.error("Token verification failed for tenant {}: {}", tenantId, e.getMessage());
       return false;
     }
   }
 
   private void sendNotification(WebSocketSession session, TextMessage message, long tenantId) {
     try {
-      MDC.put("tenant_id", String.valueOf(tenantId));
-      MDC.put("session_id", session.getId());
       log.debug("Sending notification message to tenant user");
 
       session.sendMessage(message);
     } catch (Exception e) {
-      log.error("Failed to send message to session", e);
+      log.error("Failed to send message to session: {}", e.getMessage());
     }
-  }
-
-  private void setMdcForSession(WebSocketSession session) {
-    MDC.put("session_id", session.getId());
-    MDC.put("session_uri", String.valueOf(session.getUri()));
   }
 }
