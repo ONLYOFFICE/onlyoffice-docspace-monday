@@ -1,6 +1,8 @@
 server:
   origin: ${SERVER_ORIGIN:}
 spring:
+  main:
+    banner-mode: "off"
   config:
     import:
       - "classpath:application-datasource.yml"
