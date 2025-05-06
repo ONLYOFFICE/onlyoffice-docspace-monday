@@ -8,7 +8,6 @@
         <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeContext>false</includeContext>
-                <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
                 <includeMdc>true</includeMdc>
                 <includeMdcKeyName>traceId</includeMdcKeyName>
                 <includeMdcKeyName>spanId</includeMdcKeyName>
