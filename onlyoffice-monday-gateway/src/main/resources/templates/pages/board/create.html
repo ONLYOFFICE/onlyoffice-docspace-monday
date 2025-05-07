@@ -83,8 +83,8 @@
                                 };
 
                                 try {
-                                    const mondayTag = "Monday integration";
-                                    const composeTag = String(`Monday Board - ${context.data.boardId}`);
+                                    const mondayTag = "monday integration";
+                                    const composeTag = String(`monday board - ${context.data.boardId}`);
                                     const results = await withTimeout(Promise.allSettled([
                                         docSpace.createTag(mondayTag),
                                         docSpace.createTag(composeTag),

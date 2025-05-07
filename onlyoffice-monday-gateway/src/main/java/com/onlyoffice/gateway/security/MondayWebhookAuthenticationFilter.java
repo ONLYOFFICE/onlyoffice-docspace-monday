@@ -66,7 +66,7 @@ public class MondayWebhookAuthenticationFilter extends OncePerRequestFilter {
         return;
       }
 
-      throw new JwtException("Could not decode Monday session token");
+      throw new JwtException("Could not decode monday session token");
     } catch (JwtException e) {
       response.setStatus(HttpStatus.FORBIDDEN.value());
     }

@@ -97,5 +97,5 @@ resilience4j:
 info:
   app:
     name: "onlyoffice-gateway"
-    description: "ONLYOFFICE x Monday Gateway Service"
+    description: "ONLYOFFICE x monday Gateway Service"
     version: "1.0.1"

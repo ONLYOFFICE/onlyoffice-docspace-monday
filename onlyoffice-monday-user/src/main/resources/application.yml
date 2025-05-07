@@ -42,5 +42,5 @@ resilience4j:
 info:
   app:
     name: "onlyoffice-user"
-    description: "ONLYOFFICE x Monday User Service"
+    description: "ONLYOFFICE x monday User Service"
     version: "1.0.1"

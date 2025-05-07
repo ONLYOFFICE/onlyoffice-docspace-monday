@@ -1,4 +1,4 @@
-Monday ONLYOFFICE DocSpace integration app uses code from the following 3rd party projects:
+monday ONLYOFFICE DocSpace integration app uses code from the following 3rd party projects:
 
 spring data redis - This module provides integration with the Redis store. (https://github.com/spring-projects/spring-data-redis/blob/main/LICENSE.txt)
 License:        Apache 2.0
