@@ -27,6 +27,7 @@
                 loading: false,
                 modal: false,
                 confirmation: false,
+                hasCspError: false,
                 url: "[[${page?.data?.login?.url}]]",
                 email: "",
                 password: "",
@@ -41,7 +42,8 @@
                 },
                 setCspError() {
                     this.loading = false;
-                    this.disabled = true;
+                    this.disabled = false;
+                    this.hasCspError = true;
                 },
                 setSuccess() {
                     this.error = false;
@@ -52,6 +54,14 @@
                     this.disabled = false;
                 },
                 toggleSubmit() {
+                    if (this.hasCspError) {
+                        mondaySdk().execute("notice", {
+                            message: this.cspError,
+                            type: "error",
+                            timeout: 10000,
+                        });
+                        return;
+                    }
                     this.disabled = true;
                     this.loading = true;
                     this.url = Alpine.store('htmxEventManager').sanitizeUrl(this.url);

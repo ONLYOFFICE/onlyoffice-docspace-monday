@@ -14,6 +14,7 @@
 package com.onlyoffice.gateway.controller.view.model.board;
 
 import com.onlyoffice.gateway.controller.view.model.LoginModel;
+import com.onlyoffice.gateway.controller.view.model.settings.SettingsConfigureInformationModel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,10 @@ public class DocSpaceBoardModel {
 
   @Builder.Default
   private DocSpaceBoardManagerModel docSpaceManager = DocSpaceBoardManagerModel.builder().build();
+
+  @Builder.Default
+  private SettingsConfigureInformationModel information =
+      SettingsConfigureInformationModel.builder().build();
 
   @Getter
   @Setter

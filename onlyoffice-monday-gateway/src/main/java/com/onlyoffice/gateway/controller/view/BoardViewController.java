@@ -20,7 +20,9 @@ import com.onlyoffice.common.user.transfer.response.UserCredentials;
 import com.onlyoffice.gateway.client.TenantServiceClient;
 import com.onlyoffice.gateway.client.UserServiceClient;
 import com.onlyoffice.gateway.configuration.i18n.MessageSourceService;
-import com.onlyoffice.gateway.controller.view.model.*;
+import com.onlyoffice.gateway.controller.view.model.ErrorPageModel;
+import com.onlyoffice.gateway.controller.view.model.LoginModel;
+import com.onlyoffice.gateway.controller.view.model.PageRendererWrapper;
 import com.onlyoffice.gateway.controller.view.model.board.BoardAdminConfigureModel;
 import com.onlyoffice.gateway.controller.view.model.board.BoardCreateRoomModel;
 import com.onlyoffice.gateway.controller.view.model.board.DocSpaceBoardModel;
@@ -128,7 +130,8 @@ public class BoardViewController implements InitializingBean, DisposableBean {
       }
 
       counter.increment();
-      return renderDocSpaceBoardView(tenantCredentials, userCredentials, boardInformation, partial);
+      return renderDocSpaceBoardView(
+          user, tenantCredentials, userCredentials, boardInformation, partial);
     } catch (CompletionException | InterruptedException | ExecutionException e) {
       return handleServerError(user, partial);
     } catch (RuntimeException e) {
@@ -204,6 +207,7 @@ public class BoardViewController implements InitializingBean, DisposableBean {
   }
 
   private ModelAndView renderDocSpaceBoardView(
+      MondayAuthenticationPrincipal user,
       TenantCredentials tenantCredentials,
       UserCredentials userCredentials,
       BoardInformation boardInformation,
@@ -224,6 +228,7 @@ public class BoardViewController implements InitializingBean, DisposableBean {
                     .unlinkRoomHeader(messageService.getMessage("pages.docSpace.unlinkRoomHeader"))
                     .unlinkRoomText(messageService.getMessage("pages.docSpace.unlinkRoomText"))
                     .build())
+            .information(buildSettingsConfigureInformationModel(user))
             .build());
   }
 
@@ -239,7 +244,9 @@ public class BoardViewController implements InitializingBean, DisposableBean {
                     .addressText(user.getSlug())
                     .error(messageService.getMessage("pages.settings.configure.login.error"))
                     .success(messageService.getMessage("pages.settings.configure.login.success"))
-                    .cspError(messageService.getMessage("pages.settings.configure.login.cspError"))
+                    .cspError(
+                        messageService.getMessage(
+                            "pages.settings.configure.login.cspError", selfOrigin))
                     .sizeHeaderError(
                         messageService.getMessage("pages.settings.configure.login.sizeHeaderError"))
                     .sizeHeaderText(
@@ -302,7 +309,7 @@ public class BoardViewController implements InitializingBean, DisposableBean {
         .hash(userCredentials != null ? userCredentials.getHash() : "")
         .success(messageService.getMessage("pages.settings.configure.login.success"))
         .error(messageService.getMessage("pages.settings.configure.login.error"))
-        .cspError(messageService.getMessage("pages.settings.configure.login.cspError"))
+        .cspError(messageService.getMessage("pages.settings.configure.login.cspError", selfOrigin))
         .sizeHeaderError(
             messageService.getMessage("pages.settings.configure.login.sizeHeaderError"))
         .sizeHeaderText(messageService.getMessage("pages.settings.configure.login.sizeHeaderText"))
