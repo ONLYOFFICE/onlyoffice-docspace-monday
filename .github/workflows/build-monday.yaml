@@ -1,31 +1,27 @@
-### This workflow build and push ONLYOFFICE Monday services ###
-name: Monday build
+name: "Build onlyoffice-monday"
 
-run-name: >-
-  Build Monday: 
-  VER: [${{ inputs.tag }}]
-  REPO: [${{ inputs.repo }}]
+run-name: "Build onlyoffice-monday: ${{ github.event.inputs.tag || github.run_number }}"
 
 on:
+  push:
+    branches:
+    - develop
+
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Specify tag (ex. 1.0.0 or 1.0.0-rc25)'
+        description: 'Specify tag (ex. rc5) or it will be set automaticaly :rc<run_number>'
         type: string
-        required: true
-      repo:
-        description: Mode
-        required: true
-        default: testing
-        type: choice
-        options:
-        - test
-        - production
+        required: false
     
 jobs:
   build:
     name: "Build monday"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [ gateway, tenant, user ]
     steps:
       - name: Checkout code 
         uses: actions/checkout@v4
@@ -40,26 +36,31 @@ jobs:
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '21'
-
+      
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_REGISTRY || 'docker.io' }}
-          username: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_USERNAME || secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_ACCESS_TOKEN || secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: handle-rc-tag
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref_name }}
+          MANUAL_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          echo "APP_VERSION=$()" >> "$GITHUB_ENV" # Should be set!
+          if [[ "$EVENT" == 'push' && "$REF" == 'develop' ]]; then
+           echo "RC_TAG=rc${{ github.run_number }}" >> "$GITHUB_ENV"
+          elif [[ "$EVENT" == 'workflow_dispatch' && -z "$TAG" ]]; then
+           echo "RC_TAG=rc${{ github.run_number }}" >> "$GITHUB_ENV"
+          fi
 
       - name: Build
-        env: 
-          REPO: ${{ (inputs.repo == 'test') && secrets.DOCKER_TEST_REGISTRY || 'docker.io/onlyoffice' }}
-          TAG: ${{ github.event.inputs.tag }}
+        env:
+          SERVICE_NAME: ${{ matrix.service }}
         run: |
           ./mvnw install
-          ./mvnw package -pl onlyoffice-monday-gateway -am
-          ./mvnw package -pl onlyoffice-monday-tenant -am
-          ./mvnw package -pl onlyoffice-monday-user -am
-          ./mvnw -pl onlyoffice-monday-gateway jib:dockerBuild -Ddocker.image.name=${REPO}/monday-gateway:${TAG}
-          ./mvnw -pl onlyoffice-monday-tenant jib:dockerBuild -Ddocker.image.name=${REPO}/monday-tenant:${TAG}
-          ./mvnw -pl onlyoffice-monday-user jib:dockerBuild -Ddocker.image.name=${REPO}/monday-user:${TAG}
-          docker push ${REPO}/monday-gateway:${TAG}
-          docker push ${REPO}/monday-tenant:${TAG}
-          docker push ${REPO}/monday-user:${TAG}
+          ./mvnw package -pl onlyoffice-monday-${SERVICE_NAME} -am
+          ./mvnw -pl onlyoffice-monday-${SERVICE_NAME} jib:dockerBuild -Ddocker.image.name=onlyoffice/monday-${SERVICE_NAME}:${{ env.APP_VERSION }}-${{ github.event.inputs.tag || env.RC_TAG }}
+          docker push onlyoffice/monday-${SERVICE_NAME}:${{ env.APP_VERSION }}-${{ github.event.inputs.tag || env.RC_TAG }}
