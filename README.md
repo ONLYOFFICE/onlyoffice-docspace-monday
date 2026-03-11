@@ -121,7 +121,7 @@ If you delete or archive the DocSpace room linked to a monday board:
 
 <p align="center">
   <a href="https://www.onlyoffice.com/monday">
-    <img width="600" src="//static-site.onlyoffice.com/public/images/templates/office-for-monday/should-know/deleted.svg" alt="ONLYOFFICE DocSpace for monday.com">
+    <img width="600" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/should-know/deleted.svg" alt="ONLYOFFICE DocSpace for monday.com">
   </a>
 </p>
 
@@ -136,7 +136,7 @@ This ensures everyone can access shared rooms according to their DocSpace permis
 
 <p align="center">
   <a href="https://www.onlyoffice.com/monday">
-    <img width="600" src="//static-site.onlyoffice.com/public/images/templates/office-for-monday/should-know/viewer.svg" alt="ONLYOFFICE DocSpace for monday.com">
+    <img width="600" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/should-know/viewer.svg" alt="ONLYOFFICE DocSpace for monday.com">
   </a>
 </p>
 
