@@ -37,7 +37,7 @@ Share files safely using **DocSpace Public Rooms** or restricted **external link
    - Choose its availability: either all Workspaces or specific ones.
    - You can change this later under **Manage Apps**.
    - Only admins can uninstall the app.
-    <p align="left"
+     <p align="left"
     <a href="https://www.onlyoffice.com/monday">
     <img width="400" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/settings/img-mp.svg" alt="ONLYOFFICE DocSpace for monday.com">
     </a>
@@ -51,7 +51,7 @@ Share files safely using **DocSpace Public Rooms** or restricted **external link
      - Login
      - Password
    - If you don’t have a DocSpace account, [create one for free here](https://www.onlyoffice.com/docspace-registration).
-    <p align="left"
+     <p align="left"
     <a href="https://www.onlyoffice.com/monday">
     <img width="400" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/settings/img-ds.svg" alt="ONLYOFFICE DocSpace for monday.com">
     </a>
