@@ -41,11 +41,11 @@ Share files safely using **DocSpace Public Rooms** or restricted **external link
      <a href="https://www.onlyoffice.com/monday">
        <img width="400" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/settings/img-mp.svg" alt="ONLYOFFICE DocSpace for monday.com">
      </a>
-  </p>
+   </p>
 
 2. **Connect to your DocSpace**
    - Go to your monday workspace where the app is installed.
-   - Open a board → click the ➕ plus icon → find **ONLYOFFICE DocSpace** under **Apps**.
+   - Open a board → click the plus icon → find **ONLYOFFICE DocSpace** under **Apps**.
    - An app tab appears. There, enter your:
      - DocSpace address
      - Login
