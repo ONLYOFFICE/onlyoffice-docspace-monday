@@ -1,53 +1,160 @@
 # ONLYOFFICE DocSpace app for monday
 
-This app allows working with office files related to your [monday](https://monday.com/) boards in ONLYOFFICE DocSpace rooms.
+Edit and collaborate on office files directly within your [monday](https://monday.com/) boards — powered by [ONLYOFFICE DocSpace](https://www.onlyoffice.com/docspace).
 
-## App installation and configuration
+This integration bridges your monday workflows with the secure collaborative environment of ONLYOFFICE DocSpace, so teams can manage files, share rooms, and co-edit content without switching platforms.
 
-ONLYOFFICE DocSpace app can be installed by the monday admin via the monday.com Marketplace. 
+## 🌟 Top features
 
-When installing the app, the admin chooses where it will be available: in all Workspaces or any specific Workspace(s). Later, this can be changed through the Manage Apps section.
+### 🔗 Seamless document integration
 
-The Uninstall option for the app is also available to admins only. 
+Link office files from your monday.com boards directly to [ONLYOFFICE DocSpace](https://www.onlyoffice.com/docspace) rooms. Keep every document tied to its task — no extra tabs, no scattered files.
 
-### Connection settings (for monday admins)
+### 👥 Real-time collaboration
 
-Go to the monday Workspace where the app is installed. Open the desired board and click on the plus icon. In the Apps section, find ONLYOFFICE DocSpace.
+Edit, co-author, and comment on files simultaneously with your team. All changes appear instantly.
 
-The corresponding app tab will appear. There, enter the address, login and password of your ONLYOFFICE DocSpace. If you're new to DocSpace, you can register a free account [here](https://www.onlyoffice.com/docspace-registration.aspx).
+### 🔐 Role-based access control
 
-Once ready, you also need to go to your **ONLYOFFICE DocSpace -> Developer Tools -> JavaScript SDK**. There, add the addresses of your monday and DocSpace in the section *Enter the address of DocSpace to embed*.
+Assign roles like **Content Creator**, **Viewer**, or **Guest** to manage who can view or edit files. Every monday user's access level is automatically mapped to DocSpace permissions for consistent governance.
 
-After successful authorization, the window *Welcome to DocSpace Board!* and the notification *You have successfully logged in* are displayed.
+### 🧩 Flexible workspace availability
 
-Other monday users are able to use the app only after the monday admin configures it.
+Enable the app across **all monday workspaces** or select specific ones — perfect for teams with distinct projects or departments.
 
-## App usage
+### ⚙️ Simplified admin setup
 
-After installing the app, the monday admin must click the **Create room** button. By clicking it, a Public room is created in ONLYOFFICE DocSpace, with two tags assigned: *monday integration* and *monday Board - board_id*.
+Admins can connect monday.com with ONLYOFFICE DocSpace in minutes. Just provide the DocSpace address, credentials, and SDK access — everything else syncs automatically.
 
-### Access rights
+### 🧱 Document privacy & secure sharing
 
-A public room is created on behalf of the DocSpace admin. All room participants with the Team Member role are added to the room with the Content Creator role. monday users with the Viewer and Guest roles are not invited to the room. Since the room is public, they will be able to open the files stored in the room for viewing.
+Share files safely using **DocSpace Public Rooms** or restricted **external links**. Collaborate securely while keeping full control over who can access or modify documents.
 
-If the board is shared to a group of people *(Everyone at "project name")*, users are not invited to the room. The room is still available for viewing via an external link.
+## ⚙️ Let's get you set up
 
-### What you should know 
+1. **Install the app**
+   - The monday admin installs the ONLYOFFICE DocSpace app via the [monday.com Marketplace](https://monday.com/marketplace/listing/10000860/onlyoffice-docspace).
+   - Choose its availability: either all Workspaces or specific ones.
+   - You can change this later under **Manage Apps**.
+   - Only admins can uninstall the app.
+   <p align="left"
+     <a href="https://www.onlyoffice.com/monday">
+       <img width="400" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/settings/img-mp.svg" alt="ONLYOFFICE DocSpace for monday.com">
+     </a>
+   </p>
 
-**When the room is deleted**
+2. **Connect to your DocSpace**
+   - Go to your monday workspace where the app is installed.
+   - Open a board → click the plus icon → find **ONLYOFFICE DocSpace** under **Apps**.
+   - An app tab appears. There, enter your:
+     - DocSpace address
+     - Login
+     - Password
+   - If you don't have a DocSpace account, [create one for free here](https://www.onlyoffice.com/docspace-registration).
+   <p align="left"
+     <a href="https://www.onlyoffice.com/monday">
+       <img width="400" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/settings/img-ds.svg" alt="ONLYOFFICE DocSpace for monday.com">
+     </a>
+   </p>
 
-If you delete/archive the room that was linked to the monday board, it is possible to Unlink the room by clicking the corresponding button in the app tab. Once done, you can create a new DocSpace room for this board.
+3. **Enable SDK access**
+   - In your **ONLYOFFICE DocSpace**, navigate to
+     `Developer Tools → JavaScript SDK`.
+   - Add both your **monday.com** and **DocSpace URLs** under
+     *Enter the address of DocSpace to embed*.
+   <p align="left"
+     <a href="https://www.onlyoffice.com/monday">
+       <img width="400" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/settings/img-js.svg" alt="ONLYOFFICE DocSpace for monday.com">
+     </a>
+   </p>
 
-**When you have a DocSpace account, but your monday role is Viewer or Guest**
+4. **Authorize**
+   - After successful login, you'll see:
+     *Welcome to DocSpace Board!* → *You have successfully logged in*.
+   - Other monday users can use the app once the admin completes setup.
 
-If monday users have an existing DocSpace account, they can log in with their account by clicking on the gear icon in the app tab. A right panel will appear, where it's needed to click *Go to App Settings*. In the pop-up window, users can enter their DocSpace login and password. This option is available to all monday roles (Admin, Member, Viewer, Guest).
+Once the admin sets up the link, everyone on your board can start creating and editing files right away.
 
-## Project info
+## Ready? Let's create your first room
 
-Official website: [www.onlyoffice.com](https://www.onlyoffice.com/)
+Once the app is configured, the monday admin can start linking boards to DocSpace rooms.
 
-Code repository: [github.com/ONLYOFFICE/onlyoffice-docspace-monday](https://github.com/ONLYOFFICE/onlyoffice-docspace-monday)
+Click **Create Room** in the app tab. This automatically creates a **Public Room** in ONLYOFFICE DocSpace with two tags:
 
-## User feedback and support
+- `monday integration`
+- `monday Board - board_id`
 
-In case of technical problems, the best way to get help is to submit your issues [here](https://github.com/ONLYOFFICE/onlyoffice-docspace-monday/issues). Alternatively, you can contact ONLYOFFICE team on [forum.onlyoffice.com](https://forum.onlyoffice.com/).
+This public room acts as a shared collaboration hub for all team files related to that board. Within this room, team members can store, edit, and collaborate on office documents, including text docs, presentations, PDFs, and spreadsheets.
+
+<p align="center">
+  <a href="https://www.onlyoffice.com/monday">
+    <img width="600" src="https://static-blog.onlyoffice.com/wp-content/uploads/2025/07/14160426/DocSpace-room-in-monday.png" alt="ONLYOFFICE DocSpace for monday.com">
+  </a>
+</p>
+
+## 👥 Access & permissions - who gets what access
+
+Admins, content creators, and viewers each have specific rights — making it easy to control who edits and who views.
+
+- The room is created **on behalf of the DocSpace admin**.
+- All **Team Members** from monday are added to the room as **Content Creator**.
+- **Viewers** and **Guests** are not added automatically, but can still open files from the room using an external link (read-only access).
+- Even if the board is shared with a wider group (e.g., “Everyone at Project X”), these users won't be invited to the room but can access files for viewing.
+
+<p align="center">
+  <a href="https://www.onlyoffice.com/monday">
+    <img width="600" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/usage/access.svg" alt="ONLYOFFICE DocSpace for monday.com">
+  </a>
+</p>
+
+## Managing linked rooms
+
+Here's how to clean up or reconnect your monday.com boards without losing your documents.
+
+### When you delete or archive a room
+
+If you delete or archive the DocSpace room linked to a monday board:
+- Click **Unlink Room** in the app tab.
+- This disconnects the old room from the board.
+- You can then create a **new DocSpace room** for the same board.
+
+<p align="center">
+  <a href="https://www.onlyoffice.com/monday">
+    <img width="600" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/should-know/deleted.svg" alt="ONLYOFFICE DocSpace for monday.com">
+  </a>
+</p>
+
+### If your role is Viewer or Guest
+
+Even if you're a **Viewer** or **Guest** on monday, you can still log in with an existing DocSpace account:
+1. Click the ⚙️ **Gear icon** in the app tab.
+2. Select **Go to App Settings** in the right-side panel.
+3. In the pop-up, enter your **DocSpace login and password**.
+
+This ensures everyone can access shared rooms according to their DocSpace permissions.
+
+<p align="center">
+  <a href="https://www.onlyoffice.com/monday">
+    <img width="600" src="https://static-site.onlyoffice.com/public/images/templates/office-for-monday/should-know/viewer.svg" alt="ONLYOFFICE DocSpace for monday.com">
+  </a>
+</p>
+
+## 🔒 Security & authentication
+
+- All connections between monday.com and ONLYOFFICE DocSpace use secure HTTPS APIs.
+- User credentials are stored via monday's secure token system — the app does not expose login details.
+- DocSpace links and embedded sessions follow the same authentication protocols as your organization's DocSpace.
+- Admins retain full control over linked room visibility, role mapping, and unlinking.
+
+## 💡 Need help or have an idea?
+
+* **✨ Want to know more?** Check out our [website](https://www.onlyoffice.com/monday) and [YouTube](https://youtu.be/vAGlfMb-jJA) for more info.
+* **🐞 Found a bug?** Please report it by creating an [issue](https://github.com/ONLYOFFICE/onlyoffice-docspace-monday/issues).
+* **👨‍💻 Need help for developers?** Check our [API documentation](https://api.onlyoffice.com).
+* **❓ Have a question?** Ask our community and developers on the [ONLYOFFICE Forum](https://community.onlyoffice.com/).
+* **💡 Want to suggest a feature?** Share your ideas on our [feedback platform](https://feedback.onlyoffice.com/forums/966080-your-voice-matters).
+
+---
+<p align="center">
+  Made with ❤️ by the <a href="https://www.onlyoffice.com/">ONLYOFFICE Team</a>
+</p>
