@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.common.user.transfer.request.command.RegisterUser;
 import com.onlyoffice.user.service.command.UserCommandService;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class UserCommandControllerTest {
@@ -42,7 +42,7 @@ public class UserCommandControllerTest {
 
   @BeforeEach
   public void setup() {
-    JacksonTester.initFields(this, new ObjectMapper());
+    JacksonTester.initFields(this, new JsonMapper());
     mvc =
         MockMvcBuilders.standaloneSetup(commandController)
             .setControllerAdvice(new GlobalControllerAdvice())

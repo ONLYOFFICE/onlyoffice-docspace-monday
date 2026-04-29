@@ -5,6 +5,8 @@ spring:
     name: onlyoffice-user
   cache:
     type: hazelcast
+  hazelcast:
+    config: classpath:hazelcast.yml
   cloud:
     kubernetes:
       discovery:
