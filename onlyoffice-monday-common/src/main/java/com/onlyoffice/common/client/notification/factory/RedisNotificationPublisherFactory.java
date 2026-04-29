@@ -18,14 +18,14 @@ import java.util.function.Consumer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @AutoConfiguration
-@AutoConfigureAfter(RedisAutoConfiguration.class)
+@AutoConfigureAfter(
+    name = "org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration")
 @ConditionalOnBean({RedisConnectionFactory.class})
 public class RedisNotificationPublisherFactory implements NotificationPublisherFactory {
   private final RedisTemplate<String, NotificationEvent> redisTemplate;
@@ -34,7 +34,7 @@ public class RedisNotificationPublisherFactory implements NotificationPublisherF
     var template = new RedisTemplate<String, NotificationEvent>();
     template.setConnectionFactory(redisConnectionFactory);
     template.setKeySerializer(new StringRedisSerializer());
-    template.setValueSerializer(new Jackson2JsonRedisSerializer<>(NotificationEvent.class));
+    template.setValueSerializer(new JacksonJsonRedisSerializer<>(NotificationEvent.class));
     template.afterPropertiesSet();
     redisTemplate = template;
   }
