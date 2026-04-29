@@ -28,12 +28,6 @@
                     <timestamp>date</timestamp>
                     <thread>threadId</thread>
                     <levelValue>[ignore]</levelValue>
-                    <protocol>[ignore]</protocol>
-                    <status_code>[ignore]</status_code>
-                    <requested_url>[ignore]</requested_url>
-                    <remote_host>[ignore]</remote_host>
-                    <remote_user>[ignore]</remote_user>
-                    <content_length>[ignore]</content_length>
                 </fieldNames>
                 <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                     <rootCauseFirst>true</rootCauseFirst>
