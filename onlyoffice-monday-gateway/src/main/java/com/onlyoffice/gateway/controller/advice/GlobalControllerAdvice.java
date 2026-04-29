@@ -133,7 +133,7 @@ public class GlobalControllerAdvice {
     var body = new HashMap<String, Object>();
     var errors = new HashMap<String, String>();
 
-    e.getAllValidationResults()
+    e.getParameterValidationResults()
         .forEach(
             result -> {
               String paramName = result.getMethodParameter().getParameterName();
