@@ -39,7 +39,7 @@ public class TenantCommandControllerTest {
   @Mock private TenantCommandService commandService;
   @InjectMocks private TenantCommandController controller;
 
-  private JacksonTester<RegisteыrTenant> jsonRegisterTenant;
+  private JacksonTester<RegisterTenant> jsonRegisterTenant;
 
   @BeforeEach
   public void setup() {
