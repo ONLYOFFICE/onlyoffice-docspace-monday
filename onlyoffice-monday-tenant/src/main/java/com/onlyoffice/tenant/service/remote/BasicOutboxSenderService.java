@@ -13,6 +13,7 @@
  */
 package com.onlyoffice.tenant.service.remote;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +54,7 @@ public class BasicOutboxSenderService implements OutboxSenderService {
 
         bridge.send(getBinding(outbox.getType()), getBindingPayload(outbox));
         processedOutboxes.add(outbox);
-      } catch (JsonProcessingException e) {
+      } catch (JacksonException e) {
         log.error("Could not process a JSON outbox entry: {}", e.getMessage());
         processedOutboxes.add(outbox);
       } catch (Exception e) {

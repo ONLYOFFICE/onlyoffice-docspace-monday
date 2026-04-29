@@ -16,7 +16,6 @@ package com.onlyoffice.tenant.controller.query;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.common.tenant.transfer.request.query.FindEntity;
 import com.onlyoffice.common.tenant.transfer.response.BoardInformation;
 import com.onlyoffice.tenant.controller.GlobalControllerAdvice;
@@ -34,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class BoardQueryControllerTest {
@@ -45,7 +45,7 @@ public class BoardQueryControllerTest {
 
   @BeforeEach
   public void setup() {
-    JacksonTester.initFields(this, new ObjectMapper());
+    JacksonTester.initFields(this, new JsonMapper());
     mvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new GlobalControllerAdvice())

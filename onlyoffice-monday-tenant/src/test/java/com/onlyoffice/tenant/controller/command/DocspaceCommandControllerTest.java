@@ -16,7 +16,6 @@ package com.onlyoffice.tenant.controller.command;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.common.tenant.transfer.request.command.RegisterDocSpace;
 import com.onlyoffice.tenant.controller.GlobalControllerAdvice;
 import com.onlyoffice.tenant.service.command.DocSpaceCommandService;
@@ -31,6 +30,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class DocspaceCommandControllerTest {
@@ -42,7 +42,7 @@ public class DocspaceCommandControllerTest {
 
   @BeforeEach
   public void setup() {
-    JacksonTester.initFields(this, new ObjectMapper());
+    JacksonTester.initFields(this, new JsonMapper());
     mvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new GlobalControllerAdvice())
