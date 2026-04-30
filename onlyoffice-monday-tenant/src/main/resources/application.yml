@@ -122,4 +122,4 @@ info:
   app:
     name: "onlyoffice-tenant"
     description: "ONLYOFFICE x monday Tenant Service"
-    version: "1.0.1"
+    version: "1.1.0"

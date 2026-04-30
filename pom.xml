@@ -7,7 +7,7 @@
 	<organization>
 		<name>onlyoffice</name>
 	</organization>
-	<version>1.0.1</version>
+	<version>1.1.0</version>
     <packaging>pom</packaging>
     <name>monday</name>
 	<description>ONLYOFFICE DocSpace monday Integration</description>

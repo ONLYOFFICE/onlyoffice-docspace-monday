@@ -43,4 +43,4 @@ info:
   app:
     name: "onlyoffice-user"
     description: "ONLYOFFICE x monday User Service"
-    version: "1.0.1"
+    version: "1.1.0"
