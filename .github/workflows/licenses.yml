@@ -13,11 +13,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Install Java 21
+      - name: Install Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '25'
       - name: Delete Maven Wrappers
         run: |
           ./mvnw install -DskipTests
