@@ -32,15 +32,17 @@ public class TenantServiceClientFallbackFactory implements FallbackFactory<Tenan
       }
 
       public ResponseEntity<TenantCredentials> findTenant(long tenantId) {
-        if (cause instanceof ExecutionException e
-            && e.getCause() instanceof ServiceBadRequestException)
+        if (cause instanceof ServiceBadRequestException
+            || (cause instanceof ExecutionException e
+                && e.getCause() instanceof ServiceBadRequestException))
           return ResponseEntity.badRequest().build();
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
       }
 
       public ResponseEntity<BoardInformation> findBoard(long boardId) {
-        if (cause instanceof ExecutionException e
-            && e.getCause() instanceof ServiceBadRequestException)
+        if (cause instanceof ServiceBadRequestException
+            || (cause instanceof ExecutionException e
+                && e.getCause() instanceof ServiceBadRequestException))
           return ResponseEntity.badRequest().build();
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
       }

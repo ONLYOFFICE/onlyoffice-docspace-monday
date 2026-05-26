@@ -33,14 +33,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -48,9 +48,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {BasicUserCommandServiceTest.TestConfig.class})
 public class BasicUserCommandServiceTest {
-  @MockBean private PlatformTransactionManager platformTransactionManager;
-  @MockBean private UserRepository userRepository;
-  @MockBean private CacheManager cacheManager;
+  @MockitoBean private PlatformTransactionManager platformTransactionManager;
+  @MockitoBean private UserRepository userRepository;
+  @MockitoBean private CacheManager cacheManager;
   @Autowired private UserCommandService service;
 
   @TestConfiguration

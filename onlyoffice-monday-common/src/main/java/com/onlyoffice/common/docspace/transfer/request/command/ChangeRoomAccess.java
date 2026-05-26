@@ -31,7 +31,7 @@ public class ChangeRoomAccess {
   @Setter
   @Builder
   public static class AccessEntry {
-    private final UserAccess access;
-    private final String id;
+    private UserAccess access;
+    private String id;
   }
 }

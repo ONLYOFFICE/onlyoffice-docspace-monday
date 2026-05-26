@@ -105,7 +105,8 @@ public class BasicBoardCommandServiceTest {
       when(tenantRepository.getReferenceById(command.getTenantId()))
           .thenReturn(Tenant.builder().id(1).build());
 
-      when(mapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+      when(mapper.writeValueAsString(any()))
+          .thenThrow(new JsonProcessingException("mock serialization failure") {});
 
       assertThatThrownBy(() -> service.register(command, docSpaceUsers))
           .isInstanceOf(OutboxSerializationException.class);

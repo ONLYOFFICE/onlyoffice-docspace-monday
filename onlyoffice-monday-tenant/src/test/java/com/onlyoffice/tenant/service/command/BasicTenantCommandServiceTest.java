@@ -94,7 +94,8 @@ public class BasicTenantCommandServiceTest {
               .adminHash("adminHash")
               .build();
 
-      when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+      when(objectMapper.writeValueAsString(any()))
+          .thenThrow(new JsonProcessingException("mock serialization failure") {});
       assertThatThrownBy(() -> service.register(command))
           .isInstanceOf(OutboxSerializationException.class);
       verify(tenantRepository).save(any(Tenant.class));

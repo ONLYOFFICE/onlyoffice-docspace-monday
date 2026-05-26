@@ -5,6 +5,8 @@ spring:
     name: onlyoffice-user
   cache:
     type: hazelcast
+  hazelcast:
+    config: classpath:hazelcast.yml
   cloud:
     kubernetes:
       discovery:
@@ -43,4 +45,4 @@ info:
   app:
     name: "onlyoffice-user"
     description: "ONLYOFFICE x monday User Service"
-    version: "1.0.2"
+    version: "1.1.0"

@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.common.user.transfer.request.query.FindUser;
 import com.onlyoffice.common.user.transfer.response.DocSpaceUsers;
 import com.onlyoffice.common.user.transfer.response.UserCredentials;
@@ -37,6 +36,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class UserQueryControllerTest {
@@ -52,7 +52,7 @@ public class UserQueryControllerTest {
 
   @BeforeEach
   public void setup() {
-    JacksonTester.initFields(this, new ObjectMapper());
+    JacksonTester.initFields(this, new JsonMapper());
     mvc =
         MockMvcBuilders.standaloneSetup(queryController)
             .setControllerAdvice(new GlobalControllerAdvice())

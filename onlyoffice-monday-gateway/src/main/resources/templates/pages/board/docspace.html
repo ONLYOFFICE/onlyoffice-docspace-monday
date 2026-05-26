@@ -52,6 +52,11 @@
                     const { boardId, theme, user } = (await monday.get("context")).data;
                     await monday.execute('valueCreatedForUser');
 
+                    const loadTimeout = setTimeout(() => {
+                        if (user.isAdmin)
+                            this.unlinkRequired = true;
+                    }, 60000);
+
                     window.DocSpace.SDK.initSystem({
                         src: this.url,
                         frameId: 'ds-frame',
@@ -77,12 +82,17 @@
                                         mode: this.accessKey ? "other" : "manager",
                                         requestToken: this.accessKey,
                                         events: {
-                                            onAppReady: () => { this.appReady = true; },
+                                            onAppReady: () => {
+                                                clearTimeout(loadTimeout);
+                                                this.appReady = true;
+                                            },
                                             onNotFound: async () => {
+                                                clearTimeout(loadTimeout);
                                                 if (user.isAdmin)
                                                     this.unlinkRequired = true;
                                             },
                                             onContentReady: async () => {
+                                                clearTimeout(loadTimeout);
                                                 this.contentReady = true;
                                                 const staleRoom = this.contentReady && !this.appReady;
                                                 if (staleRoom && user.isAdmin) {
@@ -104,10 +114,12 @@
                                             : {})
                                     });
                                 } catch (error) {
+                                    clearTimeout(loadTimeout);
                                     this.loggedIn = false;
                                 }
                             },
                             onAppError: (error) => {
+                                clearTimeout(loadTimeout);
                                 if (/\(CSP\)/.test(error))
                                     this.hasCspError = true;
                                 this.loggedIn = false;

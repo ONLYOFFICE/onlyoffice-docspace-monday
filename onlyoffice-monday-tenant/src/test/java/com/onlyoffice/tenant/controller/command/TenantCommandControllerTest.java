@@ -16,8 +16,6 @@ package com.onlyoffice.tenant.controller.command;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.onlyoffice.common.tenant.transfer.request.command.RegisterTenant;
 import com.onlyoffice.common.tenant.transfer.response.TenantCredentials;
 import com.onlyoffice.tenant.controller.GlobalControllerAdvice;
@@ -33,6 +31,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class TenantCommandControllerTest {
@@ -44,12 +43,7 @@ public class TenantCommandControllerTest {
 
   @BeforeEach
   public void setup() {
-    JacksonTester.initFields(
-        this,
-        JsonMapper.builder()
-            .findAndAddModules()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .build());
+    JacksonTester.initFields(this, JsonMapper.builder().findAndAddModules().build());
     mvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new GlobalControllerAdvice())

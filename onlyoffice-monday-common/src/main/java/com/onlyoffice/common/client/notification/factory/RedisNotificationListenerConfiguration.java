@@ -25,7 +25,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 @AutoConfiguration
 @AutoConfigureAfter(RedisNotificationPublisherFactory.class)
-@ConditionalOnBean({RedisConnectionFactory.class, NotificationProcessor.class})
+@ConditionalOnBean({NotificationPublisherFactory.class, NotificationProcessor.class})
 public class RedisNotificationListenerConfiguration {
   @Value("${redis.notification.channel:notifications}")
   private String channel;

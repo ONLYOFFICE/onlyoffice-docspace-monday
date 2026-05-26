@@ -27,7 +27,7 @@
                 },
                 createRoom() {
                     this.disable();
-                    const methodTimeout = setTimeout(async () => {
+                    let methodTimeout = setTimeout(async () => {
                         this.enable();
                         this.onAppReadyProcessed = false;
                         if (DocSpace.SDK.frames['ds-frame'])
@@ -37,9 +37,8 @@
                             type: "error",
                             timeout: 10000,
                         });
-                        htmx.ajax('GET', `/views/refresh?boardId=${boardId}`, { target: '#content', swap: 'innerHTML' });
-                    }, 15000);
-                    
+                    }, 25000);
+
                     const monday = mondaySdk();
                     const frame = window.DocSpace.SDK.initManager({
                         src: this.url,
@@ -48,6 +47,7 @@
                             onAppReady: async () => {
                                 if (this.onAppReadyProcessed) return;
                                 this.onAppReadyProcessed = true;
+                                clearTimeout(methodTimeout);
                                 const context = await monday.get("context");
                                 const docSpace = DocSpace.SDK.frames['ds-frame'];
                                 const boardResponse = await monday.api(`
@@ -66,7 +66,6 @@
                                 const board = boardResponse?.data?.boards?.[0];
                                 if (!board) {
                                     this.enable();
-                                    clearTimeout(methodTimeout);
                                     return;
                                 }
 
@@ -89,33 +88,23 @@
                                         docSpace.createTag(mondayTag),
                                         docSpace.createTag(composeTag),
                                         docSpace.createRoom(board.name, 6),
-                                    ]), 10000);
+                                    ]), 18000);
 
                                     const roomResult = results[2];
                                     if (!roomResult?.value?.id) {
-                                        if (roomResult?.value?.status == 402) {
-                                            this.enable();
-                                            this.onAppReadyProcessed = false;
-                                            clearTimeout(methodTimeout);
-                                            await monday.execute("notice", {
-                                                message: this.roomsQuotaError,
-                                                type: "error",
-                                                timeout: 10000,
-                                            });
-                                        } else {
-                                            this.enable();
-                                            this.onAppReadyProcessed = false;
-                                            clearTimeout(methodTimeout);
-                                            await monday.execute("notice", {
-                                                message: this.operationError,
-                                                type: "error",
-                                                timeout: 10000,
-                                            });
-                                        }
+                                        this.enable();
+                                        this.onAppReadyProcessed = false;
+                                        await monday.execute("notice", {
+                                            message: roomResult?.value?.status == 402
+                                                ? this.roomsQuotaError
+                                                : this.operationError,
+                                            type: "error",
+                                            timeout: 10000,
+                                        });
                                         return;
                                     }
 
-                                    const link = await withTimeout(docSpace.addTagsToRoom(roomResult.value.id, [mondayTag, composeTag]), 2250);
+                                    const link = await withTimeout(docSpace.addTagsToRoom(roomResult.value.id, [mondayTag, composeTag]), 10000);
                                     if (!link?.id)
                                         throw new Error("Could not create a new room");
 
@@ -127,12 +116,9 @@
                                             roomId: roomResult?.value?.id,
                                             users: ids,
                                         },
-                                    }).then(() => {
-                                        clearTimeout(methodTimeout);
-                                    }).catch(async (error) => {
+                                    }).catch(async () => {
                                         this.enable();
                                         this.onAppReadyProcessed = false;
-                                        clearTimeout(methodTimeout);
                                         await monday.execute("notice", {
                                             message: this.operationError,
                                             type: "error",
@@ -142,7 +128,6 @@
                                 } catch (error) {
                                     this.enable();
                                     this.onAppReadyProcessed = false;
-                                    clearTimeout(methodTimeout);
                                     await monday.execute("notice", {
                                         message: this.timeoutError,
                                         type: "error",

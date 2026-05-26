@@ -13,7 +13,7 @@
  */
 package com.onlyoffice.tenant.service.command;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlyoffice.common.CommandMessage;
 import com.onlyoffice.common.tenant.transfer.request.command.InviteRoomUsers;
@@ -97,7 +97,7 @@ public class BasicBoardCommandService implements BoardCommandService {
                           .build()))
               .type(OutboxType.INVITE)
               .build());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("Could not perform json serialization: {}", e.getMessage());
       throw new OutboxSerializationException(e);
     } finally {
